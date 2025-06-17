@@ -1,5 +1,5 @@
 import { DungeonNode } from 'Nodes'
-import { Helmet } from 'react-helmet'
+import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import useListen from '../api/useListen'
 import { createMarkup } from '../utils'

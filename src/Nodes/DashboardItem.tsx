@@ -4,6 +4,7 @@ import { SimpleIcon, Styles } from '../Interface'
 import { ITEM_BORDER } from './ViewNode.styled'
 import { DungeonNode, GunId } from '.'
 import useUpdate from '../api/useUpdate'
+import { useAuth } from '../utils/AuthContext'
 
 export const NodeLink = styled(Link)`
    padding: 1rem 1rem;
@@ -53,11 +54,74 @@ const Tools = styled.div`
    }
 `
 
+const NodeActions = styled.div`
+   display: flex;
+   gap: 6px;
+   margin-top: 8px;
+   
+   .node-action-btn {
+      padding: 3px 8px;
+      font-size: 10px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:hover {
+         background: #f8f9fa;
+      }
+      
+      &.delete-btn:hover {
+         border-color: #dc3545;
+         color: #dc3545;
+      }
+      
+      &.delete-full-btn:hover {
+         border-color: #721c24;
+         color: #721c24;
+         background: #f8d7da;
+      }
+   }
+`
+
 const Title = styled.div`
    flex: 1;
    font-size: 18px;
    font-weight: 600;
    cursor: pointer;
+`
+
+const UserInfo = styled.div`
+   font-size: 12px;
+   color: #666;
+   margin-bottom: 5px;
+   display: flex;
+   align-items: center;
+   gap: 6px;
+   
+   .user-name {
+      font-weight: 500;
+      color: #333;
+   }
+   
+   .shogun-badge {
+      background: #28a745;
+      color: white;
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 8px;
+      font-weight: bold;
+   }
+   
+   .guest-badge {
+      background: #6c757d;
+      color: white;
+      font-size: 9px;
+      padding: 1px 4px;
+      border-radius: 8px;
+      font-weight: bold;
+   }
 `
 
 const MessageStyled = styled.div`
@@ -80,6 +144,7 @@ export const LinkWrapper = styled.div`
 const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
    const [createNode] = useUpdate('node')
    const navigate = useNavigate()
+   const auth = useAuth()
 
    const itemClicked = (id: string) => {
       if (id) {
@@ -93,16 +158,94 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
       createNode({ key: id, upVotes })
    }
 
+   // Verifica se l'utente può modificare/cancellare il nodo
+   const canEditNode = (node: DungeonNode) => {
+      if (!node) return false
+      // Se l'utente è autenticato con Shogun, può modificare solo i suoi nodi
+      if (auth.isAuthenticated) {
+         return node.userPub === auth.userPub || node.user === auth.username
+      }
+      // Se è guest, può modificare solo i nodi con lo stesso username locale
+      return node.user === auth.currentUsername
+   }
+
+   // Funzione per cancellare collegamento nodo
+   const handleDeleteLink = () => {
+      const confirmText = `Rimuovere il collegamento a questo nodo?\n\n"${node.directionText || 'Nodo senza titolo'}"\n\nIl nodo rimarrà nel database ma non sarà più collegato qui.`
+      if (window.confirm(confirmText)) {
+         console.log(`🔗 Rimozione collegamento nodo: ${id}`)
+         pruneRight(id, false)
+      }
+   }
+
+   // Funzione per cancellare nodo completamente
+   const handleDeleteNode = () => {
+      const confirmText = `ATTENZIONE: Cancellare completamente questo nodo?\n\n"${node.directionText || 'Nodo senza titolo'}"\n\nQuesta azione eliminerà il nodo dal database e NON PUÒ essere annullata!`
+      if (window.confirm(confirmText)) {
+         console.log(`🗑️ Cancellazione completa nodo: ${id}`)
+         pruneRight(id, true)
+      }
+   }
+
    return (
       <LinkWrapper className="linkWrapper">
          <StartEnd {...node} />
 
          <div style={{ flex: 1 }}>
+            {/* Info utente */}
+            <UserInfo>
+               <span className="user-name">
+                  {node.userPub 
+                     ? `${node.userPub.substring(0, 12)}...`
+                     : (node.user || 'Unknown')
+                  }
+               </span>
+               {node.userType === 'shogun' && (
+                  <span className="shogun-badge">SHOGUN</span>
+               )}
+               {node.userType === 'guest' && (
+                  <span className="guest-badge">GUEST</span>
+               )}
+               {!node.userType && node.user && (
+                  <span className="guest-badge">LEGACY</span>
+               )}
+               {node.timestamp && (
+                  <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#999' }}>
+                     {new Date(node.timestamp).toLocaleDateString('it-IT', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                     })}
+                  </span>
+               )}
+            </UserInfo>
+            
             <Title onClick={() => itemClicked(id)}>
                {node.directionText || ``}
             </Title>
 
             <Message message={node.message} />
+            
+            {/* Azioni del nodo - mostra solo se l'utente può modificarlo */}
+            {canEditNode(node) && (
+               <NodeActions>
+                  <button 
+                     className="node-action-btn delete-btn"
+                     onClick={handleDeleteLink}
+                     title="Rimuovi collegamento (il nodo rimane nel database)"
+                  >
+                     🔗 Scollega
+                  </button>
+                  <button 
+                     className="node-action-btn delete-full-btn"
+                     onClick={handleDeleteNode}
+                     title="CANCELLA COMPLETAMENTE il nodo dal database"
+                  >
+                     🗑️ Elimina
+                  </button>
+               </NodeActions>
+            )}
          </div>
          <Tools>
             {node?.upVotes}
@@ -115,16 +258,10 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
                   upVote(node)
                }}
             />
-            {/* <SimpleIcon
-                    content="[ ⇩ ]"
-                    hoverContent={'[ ⇩ ]'}
-                    style={Styles.positive}
-                    className="simpleIcon"
-                    onClick={() => {}}
-                /> */}
+            {/* Manteniamo l'icona originale per compatibilità */}
             <SimpleIcon
                content="[ ␡ ]"
-               hoverContent={'[ ␡ ]'}
+               hoverContent={'[ ␡ ] Click: scollega, Cmd+Click: elimina'}
                style={Styles.warning}
                className="simpleIcon"
                onClick={(event: MouseEvent) => {
@@ -132,13 +269,6 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
                   pruneRight(id)
                }}
             />
-            {/* <SimpleIcon
-                    content="[ ✎ ]"
-                    hoverContent={'[ ✎ ]'}
-                    style={Styles.positive}
-                    className="simpleIcon"
-                    onClick={() => {}}
-                /> */}
          </Tools>
       </LinkWrapper>
    )

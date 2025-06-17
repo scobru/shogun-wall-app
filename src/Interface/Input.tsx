@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { forwardRef } from 'react'
 import styled from 'styled-components/macro'
 
 const StyledInput = styled.input`
@@ -19,30 +19,11 @@ const StyledInput = styled.input`
    }
 `
 
-type InputT = {
-   placeholder?: string
-   onKeyPress?: (e: React.KeyboardEvent) => void
-   name?: string
-   register?: Function
-   required?: boolean
-}
-
-const Input: FC<InputT> = ({
-   name,
-   register,
-   required = false,
-   placeholder,
-   onKeyPress,
-}) => {
-   const registerHolder = register && name ? register(name, { required }) : {}
-
-   return (
-      <StyledInput
-         {...registerHolder} //{register ? ...(register(name), { required }) : undefined}
-         placeholder={placeholder}
-         onKeyPress={onKeyPress}
-      ></StyledInput>
-   )
-}
+const Input = forwardRef<
+   HTMLInputElement,
+   React.InputHTMLAttributes<HTMLInputElement>
+>((props, ref) => {
+   return <StyledInput {...props} ref={ref} />
+})
 
 export default Input

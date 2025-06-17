@@ -158,7 +158,7 @@ const GetAll = () => {
    // init the page title
    useEffect(() => {
       document.title = `
-         Wallie, a front [page,]
+         HAL 9000 - System Interface
       `
    }, [])
 

@@ -8,7 +8,8 @@ import { Wrapper, FormItem } from './NewNode.styled'
 import useKeyboard from '../utils/useKeyboard'
 import Input from '../Interface/Input'
 import { Button, Label, Textarea } from 'Interface'
-import { useCreateNode } from './useCreateNode'
+import useCreateNodeWithAuth from './useCreateNodeWithAuth'
+import { useAuth } from '../utils/AuthContext'
 
 export type NewSubNodeProps = {
    head?: GunId
@@ -18,7 +19,8 @@ export type NewSubNodeProps = {
 
 const NewNode = (props: NewSubNodeProps) => {
    const [showAdvanced, showShowAdvanced] = useState(false)
-   const [createNode, loading] = useCreateNode(props.nodeAdded)
+   const [createNode, loading] = useCreateNodeWithAuth(props.nodeAdded)
+   const auth = useAuth()
 
    const {
       register,
@@ -33,8 +35,12 @@ const NewNode = (props: NewSubNodeProps) => {
       setValue('head', props.head || null)
       setValue('message', undefined)
       setValue('id', makeId(7, [IdTypes.lower, IdTypes.numbers]))
-      setValue('user', getRandomUsername())
-   }, [])
+      // Usa l'utente autenticato invece di uno random
+      setValue('user', auth.isAuthenticated 
+         ? (auth.userPub || auth.currentUsername || 'shogun_user')
+         : (auth.currentUsername || getRandomUsername())
+      )
+   }, [auth.isAuthenticated, auth.userPub, auth.currentUsername])
 
    useEffect(() => {
       if (keypressed === 'v') {
@@ -51,6 +57,37 @@ const NewNode = (props: NewSubNodeProps) => {
 
    return (
       <Wrapper>
+         {/* Info autenticazione */}
+         <div style={{ 
+            marginBottom: '15px', 
+            padding: '8px', 
+            backgroundColor: '#f8f9fa', 
+            borderRadius: '4px',
+            fontSize: '13px',
+            border: '1px solid #dee2e6'
+         }}>
+            <strong>Creando come: </strong>
+            <span style={{ color: auth.isAuthenticated ? '#28a745' : '#6c757d' }}>
+               {auth.isAuthenticated 
+                  ? (auth.userPub?.substring(0, 12) + '...' || auth.currentUsername || 'Shogun User')
+                  : (auth.currentUsername || 'Guest User')
+               }
+               {auth.isAuthenticated && (
+                  <span style={{ marginLeft: '6px', color: '#28a745' }}>✓ Shogun</span>
+               )}
+            </span>
+            {!auth.hasAnyAuth && (
+               <span style={{ marginLeft: '10px' }}>
+                  <Button 
+                     onClick={auth.redirectToAuth} 
+                     style={{ fontSize: '11px', padding: '2px 6px' }}
+                  >
+                     Accedi
+                  </Button>
+               </span>
+            )}
+         </div>
+         
          {/* Subject line */}
          <FormItem
             hidden={!!props.head}
@@ -128,7 +165,10 @@ const NewNode = (props: NewSubNodeProps) => {
             />
          </FormItem>
          {/* User */}
-         <FormItem className={errors['user'] ? 'error' : ''}>
+         <FormItem 
+            className={errors['user'] ? 'error' : ''}
+            hidden={auth.isAuthenticated} // Nascondi se autenticato
+         >
             <Input
                register={register}
                name={'user'}
@@ -140,6 +180,21 @@ const NewNode = (props: NewSubNodeProps) => {
                ])}
             />
          </FormItem>
+         
+         {/* Mostra info user se autenticato */}
+         {auth.isAuthenticated && (
+            <FormItem>
+               <div style={{ 
+                  padding: '8px', 
+                  backgroundColor: '#e9f7ef', 
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  color: '#155724'
+               }}>
+                  <strong>User ID:</strong> {auth.userPub?.substring(0, 20)}...
+               </div>
+            </FormItem>
+         )}
          {/* Submit */}
          <FormItem>
             <Button

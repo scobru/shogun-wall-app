@@ -58,17 +58,58 @@ const TopBarStyled = styled.div`
       display: flex;
       align-items: center;
       text-decoration: none;
-      .wallieText {
-         margin-top: -40px;
+      .halText {
+         margin-top: -5px;
          margin-left: 5px;
          color: var(--text-color);
          font-family: 'Work Sans', sans-serif;
          font-weight: 800;
-         font-size: 22px;
-         text-shadow: -4px 4px #ef3550, -8px 8px #f48fb1, -12px 12px #7e57c2,
-            -16px 16px var(--color-primary), -20px 20px #26c6da,
-            -24px 24px #43a047, -28px 28px var(--bright-yellow),
-            -32px 32px #f9a825, -36px 36px #ff5722;
+         font-size: 24px;
+         background: linear-gradient(
+            45deg,
+            var(--hal-red) 0%,
+            #ff3333 25%,
+            #cc0000 50%,
+            #990000 75%,
+            var(--hal-red-dark) 100%
+         );
+         background-size: 200% auto;
+         background-clip: text;
+         -webkit-background-clip: text;
+         -webkit-text-fill-color: transparent;
+         animation: halGlow 3s ease-in-out infinite;
+         position: relative;
+         text-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+         
+         &::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--hal-red);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s ease-out;
+            box-shadow: 0 0 5px var(--hal-red);
+         }
+         
+         &:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+         }
+         
+         @keyframes halGlow {
+            0%, 100% {
+               background-position: 0% 50%;
+               filter: brightness(1);
+            }
+            50% {
+               background-position: 100% 50%;
+               filter: brightness(1.2);
+            }
+         }
       }
    }
    .darkToggle {
@@ -87,12 +128,12 @@ const TopBar = () => {
          {' '}
          <Link to="/all" className="logo">
             {' '}
-            <div className="wallieText">wallie</div>
+            <div className="halText">HAL 9000</div>
          </Link>
          <Link to="/node/new" className="newNode">
             <Button>
                <div>New</div>
-               <img src={RandomLogo} alt="Wallie Logo Dark" />
+               <img src={RandomLogo} alt="HAL Interface" />
             </Button>
          </Link>
          <div className="nav">

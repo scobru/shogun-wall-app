@@ -2,12 +2,14 @@
 
 :root {
    --background-color: #ffffff;
-   --color-primary: #2196f3;
+   --color-primary: #cc0000;
    --text-color: #000000;
    --card-color: #ffffff;
-   --url-color: #147acd;
+   --url-color: #990000;
 
    --bright-yellow: #eeff41;
+   --hal-red: #cc0000;
+   --hal-red-dark: #990000;
    --grey-dark: #2a2a29;
    --shadow-color: rgba(0, 0, 0, 0.2);
 
@@ -33,16 +35,16 @@
    --slider-knob-offset: 3px;
    --slider-knob-translateX: 25px;
    --slider-background: #ccc;
-   --slider-checked-background: var(--grey-dark);
+   --slider-checked-background: var(--hal-red);
 }
 
 [data-theme='dark'] {
    --background-color: #111111;
-   --color-primary: #073356;
+   --color-primary: #ff3333;
    --text-color: #ffffff;
    --card-color: #222222;
    --shadow-color: rgba(255, 255, 255, 0.1);
-   --url-color: #82c0f3;
+   --url-color: #ff6666;
 
    --shadow-light1: rgba(255, 255, 255, 0.05);
    --shadow-light2: rgba(255, 255, 255, 0.07);

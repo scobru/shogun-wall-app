@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { Helmet } from 'react-helmet'
+import Helmet from 'react-helmet'
 import { useForm } from 'react-hook-form'
 import { Button, Input, Label, FormItem, Textarea } from '../Interface'
-import useUpdate from '../api/useUpdate'
+import useUpdateWithAuth from '../api/useUpdateWithAuth'
+import { useAuth } from '../utils/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import Tiptap from '../Interface/TipTap'
 import useGet from '../api/useGet'
@@ -16,11 +17,12 @@ const EditPostStyled = styled.div`
 `
 
 const EditPost = () => {
-   const [createNode, loading, node] = useUpdate('post')
+   const [createNode, loading, node] = useUpdateWithAuth('post')
    const params = useParams()
    const key = params.key
    const post = useGet(key, 'post', true)
    const navigate = useNavigate()
+   const auth = useAuth()
    const {
       register,
       handleSubmit,
@@ -62,6 +64,31 @@ const EditPost = () => {
          <Helmet>
             <title>Edit Post {post?.key}</title>
          </Helmet>
+
+         {/* Mostra l'utente corrente */}
+         <div style={{ 
+            marginBottom: '20px', 
+            padding: '10px', 
+            backgroundColor: '#f5f5f5', 
+            borderRadius: '5px',
+            border: '1px solid #ddd'
+         }}>
+            <strong>Modificando come: </strong>
+            <span style={{ color: auth.isAuthenticated ? '#4CAF50' : '#666' }}>
+               {auth.currentUsername || 'Anonymous'}
+               {auth.isAuthenticated && ' (Shogun ✓)'}
+               {!auth.hasAnyAuth && (
+                  <span style={{ marginLeft: '10px' }}>
+                     <Button 
+                        onClick={auth.redirectToAuth} 
+                        style={{ fontSize: '12px', padding: '2px 8px' }}
+                     >
+                        Accedi con Shogun
+                     </Button>
+                  </span>
+               )}
+            </span>
+         </div>
 
          <FormItem className={errors['key'] ? 'error' : ''}>
             <Label>

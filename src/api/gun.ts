@@ -1,14 +1,14 @@
 import GUN from 'gun'
 
-const peers = ['https://peer.wallie.io/gun']
+const peers = ['http://localhost:8765/gun']
 
 if (window.location.hostname === 'localhost') {
    // peers.push('http://192.168.1.7:8765/gun')
-   peers.push('http://192.168.1.94:8765/gun')
+   peers.push('http://localhost:8765/gun')
 }
 
 const gun = GUN({
-   localStorage: true,
+   localStorage: false,
    peers,
 })
 
@@ -18,7 +18,7 @@ const queryString = window.location.search
 
 const urlParams = new URLSearchParams(queryString)
 const split = window.location.host.split('.')
-const subDomain = split.length > 2 ? split[0] : 'wallie2.1'
+const subDomain = split.length > 2 ? split[0] : 'hal9000'
 
 console.log(subDomain)
 
