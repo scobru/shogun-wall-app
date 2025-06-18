@@ -26,7 +26,7 @@ const NewPost = () => {
 
    useEffect(() => {
       if (!loading && node) {
-         navigate(`/blog/${node.key}`)
+         navigate('/blog')
       }
    }, [loading, node])
 
@@ -102,6 +102,25 @@ const NewPost = () => {
                Description:
                <Textarea {...register('description', { required: true })} />
             </Label>
+         </FormItem>
+
+         <FormItem className={errors['url'] ? 'error' : ''}>
+            <Label>
+               URL (og-link):
+               <Input 
+                  {...register('url', { 
+                     required: false,
+                     pattern: {
+                        value: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
+                        message: 'Please enter a valid URL'
+                     }
+                  })} 
+                  placeholder="https://example.com"
+               />
+            </Label>
+            <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+               Inserisci un URL per aggiungere un og-link al post
+            </div>
          </FormItem>
 
          <FormItem className={errors['image'] ? 'error' : ''}>

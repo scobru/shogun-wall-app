@@ -61,6 +61,8 @@ const ViewNode = () => {
       const d = gun
          .get(namespace + '/node/' + key)
          .on((node: DungeonNode | any = {}) => {
+            console.log('🔍 [Nodes/ViewNode] Nodo ricevuto:', node);
+            console.log('🔍 [Nodes/ViewNode] URL nel nodo:', node?.url);
             setNode({ ...node })
          })
       return () => {
@@ -68,12 +70,8 @@ const ViewNode = () => {
       }
    }, [key])
 
-   /**
-    *    WHY ARE THE "DIRECTIONS" HERE NOT
-    *    LIVING DIRECTLY ON THE NODE ITSELF?
-    *    well sir, that is because ________.
-    */
-   useEffect(() => {
+   // Function to load/refresh directions (comments)
+   const loadDirections = () => {
       setDirections({})
       const d = gun
          .get(namespace + '/node')
@@ -91,6 +89,16 @@ const ViewNode = () => {
       return () => {
          d.off()
       }
+   }
+
+   /**
+    *    WHY ARE THE "DIRECTIONS" HERE NOT
+    *    LIVING DIRECTLY ON THE NODE ITSELF?
+    *    well sir, that is because ________.
+    */
+   useEffect(() => {
+      const cleanup = loadDirections()
+      return cleanup
    }, [key, showHidden])
 
    const pruneRight = (id: GunId) => {
@@ -108,7 +116,9 @@ const ViewNode = () => {
    }
 
    const nodeAdded = () => {
-      console.log(`i'm in view node`)
+      console.log(`Comment added to node ${key}`)
+      // Refresh directions to show the new comment
+      loadDirections()
    }
 
    const goback = () => {
@@ -131,7 +141,14 @@ const ViewNode = () => {
 
          <MessageWrapper className="messageWrapper">
             <MessageTop className="messageTop">
-               {node?.user && <Username>@{node?.user}</Username>}
+               {node?.user && (
+                  <Username className={node?.userType === 'shogun' ? 'shogun-user' : ''}>
+                     @{node?.user}
+                     {node?.userType === 'shogun' && (
+                        <span className="verified-badge">✓</span>
+                     )}
+                  </Username>
+               )}
                {!node?.user && <LoadingWheel />}
                {dateFormatted && (
                   <MessageDate className="messageDate">
@@ -141,6 +158,29 @@ const ViewNode = () => {
                {!dateFormatted && <LoadingWheel />}
                <ViewCount count={views} />
             </MessageTop>
+
+            {/* OG Link - mostra solo se presente l'URL */}
+            {node?.url && (
+               <div style={{ 
+                  marginBottom: '15px', 
+                  padding: '8px 12px', 
+                  backgroundColor: '#f8f9fa', 
+                  borderRadius: '6px', 
+                  border: '1px solid #e9ecef',
+                  fontSize: '14px',
+                  marginTop: '10px'
+               }}>
+                  <span style={{ fontWeight: 'bold', marginRight: '8px' }}>URL Esterno:</span>
+                  <a 
+                     href={node.url} 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     style={{ color: '#0366d6', textDecoration: 'none' }}
+                  >
+                     {node.url}
+                  </a>
+               </div>
+            )}
 
             {node?.message && (
                <Message

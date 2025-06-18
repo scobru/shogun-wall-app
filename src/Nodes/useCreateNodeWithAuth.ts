@@ -2,6 +2,17 @@ import { useState } from 'react'
 import gun, { namespace } from '../api/gun'
 import { useAuth } from '../utils/AuthContext'
 
+// Funzione helper per rimuovere proprietà con valore undefined o null
+const removeUndefinedProps = (obj) => {
+   const newObj = {};
+   Object.keys(obj).forEach(key => {
+      if (obj[key] !== undefined && obj[key] !== null) {
+         newObj[key] = obj[key];
+      }
+   });
+   return newObj;
+};
+
 const useCreateNodeWithAuth = (onNodeCreated?: (node: any) => void, model: string = 'node') => {
    const [loading, setLoading] = useState<boolean>(false)
    const [node, setNode] = useState<any | undefined>()
@@ -11,36 +22,118 @@ const useCreateNodeWithAuth = (onNodeCreated?: (node: any) => void, model: strin
       console.log(`creating node with auth`)
       console.log(data)
       if (!data) {
+         console.error('Dati mancanti per la creazione del nodo')
          return
       }
+      
+      // Verifica che l'ID o la chiave non sia undefined
       const key = data.key || data.id;
       if (!key) {
-         throw new Error('Key or ID is required')
+         console.error('Key o ID mancante')
+         return
       }
       
+      // Verifica che il messaggio non sia undefined
+      if (data.message === undefined && !data.directionText) {
+         console.error('Il messaggio non può essere vuoto')
+         data.message = "<p>Nessun messaggio</p>" // Imposta un valore predefinito
+      }
+      
+      // Assicuriamoci che l'URL sia gestito correttamente
+      let url: string | null = null;
+      if (data.url && typeof data.url === 'string' && data.url.trim() !== '') {
+         const trimmedUrl = data.url.trim();
+         // Assicuriamoci che abbia un protocollo
+         if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+            url = 'https://' + trimmedUrl;
+         } else {
+            url = trimmedUrl;
+         }
+      }
+      
+      // Log per debug
+      console.log('🔗 URL fornito nel form:', data.url);
+      console.log('🔗 URL elaborato:', url);
+      
       // Aggiungi automaticamente l'autore del nodo
-      const enrichedData = {
+      let enrichedData = {
          ...data,
          user: auth.isAuthenticated 
-            ? (auth.userPub || auth.currentUsername || 'shogun_user')
-            : (auth.currentUsername || 'anonymous'),
+            ? (auth.username || 'shogun_user')
+            : (data.user || auth.currentUsername || 'anonymous'),
          userType: auth.isAuthenticated ? 'shogun' : 'guest',
-         userPub: auth.isAuthenticated ? auth.userPub : undefined,
-         userId: auth.isAuthenticated ? auth.userPub : undefined,
+         userPub: auth.isAuthenticated ? auth.userPub : null,
+         userId: auth.isAuthenticated ? auth.userPub : null,
+         date: Date.now(), // Ensure consistent date field
          timestamp: Date.now()
       }
       
+      // Aggiungiamo l'URL solo se esiste e non è vuoto
+      if (url && url !== '') {
+         enrichedData.url = url;
+         console.log('🔗 URL aggiunto ai dati arricchiti:', url);
+      } else {
+         console.log('🔗 Nessun URL valido fornito');
+      }
+      
+      // Rimuoviamo tutte le proprietà undefined che possono causare errori
+      enrichedData = removeUndefinedProps(enrichedData);
+      
+      // Debug per verificare i dati arricchiti
+      console.log('Dati arricchiti e puliti:', enrichedData);
+      
       setLoading(true)
 
+      // Salva il nodo in GunDB
       gun.get(`${namespace}/${model}`)
          .get(key)
-         .put(enrichedData, (awk) => {
+         .put(enrichedData, (awk: any) => {
             setLoading(false)
-            setNode(enrichedData)
-            if (onNodeCreated) {
-               onNodeCreated(enrichedData)
+            
+            // Verifica se ci sono stati errori
+            if (awk && awk.err) {
+               console.error('Errore nel salvataggio del nodo:', awk.err)
+               return
             }
-            console.log('Node created with auth info:', awk)
+            
+            console.log('Nodo salvato con successo:', awk)
+            setNode(enrichedData)
+            
+            // Recupera il nodo salvato con gestione errori
+            try {
+               gun.get(`${namespace}/${model}`)
+                  .get(key)
+                  .once((savedNode) => {
+                     if (!savedNode) {
+                        console.warn('Il nodo salvato è vuoto')
+                        return
+                     }
+                     
+                     console.log('Nodo salvato:', savedNode)
+                     if (savedNode.url) {
+                        console.log('URL nel nodo salvato:', savedNode.url)
+                     }
+                     
+                     // Se questo è un commento (ha proprietà head), collegalo al post padre
+                     if (data.head) {
+                        console.log('Linking comment to parent post', data.head)
+                        gun.get(`${namespace}/${model}`)
+                           .get(data.head)
+                           .get('directions')
+                           .get(key)
+                           .put(data.message || 'Comment', (dirAck) => {
+                              console.log('Comment linked to parent post:', dirAck)
+                           })
+                     }
+                     
+                     // Esegui il callback se fornito
+                     if (onNodeCreated) {
+                        onNodeCreated(enrichedData)
+                     }
+                  })
+            } catch (error) {
+               console.error('Errore nel recupero del nodo salvato:', error)
+            }
          })
    }
 

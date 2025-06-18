@@ -4,6 +4,7 @@ import {
    Routes,
    Route,
    Navigate,
+   useNavigate
 } from 'react-router-dom'
 import { ViewNode, NewNode } from './Nodes'
 import { GetAll } from './List'
@@ -21,6 +22,18 @@ function Wrapper() {
          <Analytics />
       </>
    )
+}
+
+// Componente di wrapper per il reindirizzamento automatico
+function NewNodeWithRedirect() {
+   const navigate = useNavigate();
+   
+   const handleNodeAdded = (node) => {
+      // Reindirizza alla home dopo la creazione del nodo
+      navigate('/all');
+   };
+   
+   return <NewNode nodeAdded={handleNodeAdded} />;
 }
 
 export default function Router() {
@@ -49,7 +62,7 @@ export default function Router() {
                   <Route path="node" element={<BlogWrapper />}>
                      <Route
                         path="new"
-                        element={<NewNode nodeAdded={() => {}} />}
+                        element={<NewNodeWithRedirect />}
                      />
                      <Route path=":key" element={<ViewNode />} />
                   </Route>

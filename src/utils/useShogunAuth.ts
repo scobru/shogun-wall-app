@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getOrCreateUsernameForPublicKey, formatPublicKey } from './usernameMap';
 
 // Verifica se l'ambiente è il browser
 function isBrowser() {
@@ -9,6 +10,7 @@ export interface ShogunAuthState {
   isAuthenticated: boolean;
   username: string | null;
   userPub: string | null;
+  userPubFormatted: string | null;
   error: string | null;
   loading: boolean;
 }
@@ -18,6 +20,7 @@ export function useShogunAuth() {
     isAuthenticated: false,
     username: null,
     userPub: null,
+    userPubFormatted: null,
     error: null,
     loading: true
   });
@@ -72,9 +75,13 @@ export function useShogunAuth() {
             console.log('✅ Conferma ricezione inviata da HAL 9000');
           }
           
+          // Genera o recupera username randomico associato alla chiave pubblica
+          const randomUsername = await getOrCreateUsernameForPublicKey(session.pub);
+          console.log(`🔑 Username generato per l'utente: ${randomUsername}`);
+          
           // Salva i dati dell'utente autenticato
           const userData = {
-            username: session.alias || session.pub,
+            username: randomUsername,
             userPub: session.pub,
             timestamp: Date.now()
           };
@@ -88,11 +95,12 @@ export function useShogunAuth() {
             isAuthenticated: true,
             username: userData.username,
             userPub: userData.userPub,
+            userPubFormatted: formatPublicKey(userData.userPub),
             error: null,
             loading: false
           });
           
-                      console.log('✅ Autenticazione Shogun completata in HAL 9000');
+          console.log('✅ Autenticazione Shogun completata in HAL 9000');
           
         } catch (error) {
           console.error('❌ Errore durante l\'autenticazione via PostMessage:', error);
@@ -116,7 +124,7 @@ export function useShogunAuth() {
   useEffect(() => {
     if (!isBrowser()) return;
 
-    const checkTemporaryAuth = () => {
+    const checkTemporaryAuth = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const tempAuthId = urlParams.get('temp_auth');
@@ -141,9 +149,13 @@ export function useShogunAuth() {
               url.searchParams.delete('temp_auth');
               window.history.replaceState({}, document.title, url.toString());
               
+              // Genera o recupera username randomico associato alla chiave pubblica
+              const randomUsername = await getOrCreateUsernameForPublicKey(credentials.session.pub);
+              console.log(`🔑 Username generato per l'utente: ${randomUsername}`);
+              
               // Salva i dati dell'utente
               const userData = {
-                username: credentials.session.alias || credentials.session.pub,
+                username: randomUsername,
                 userPub: credentials.session.pub,
                 timestamp: Date.now()
               };
@@ -154,6 +166,7 @@ export function useShogunAuth() {
                 isAuthenticated: true,
                 username: userData.username,
                 userPub: userData.userPub,
+                userPubFormatted: formatPublicKey(userData.userPub),
                 error: null,
                 loading: false
               });
@@ -201,6 +214,7 @@ export function useShogunAuth() {
             isAuthenticated: true,
             username: userData.username,
             userPub: userData.userPub,
+            userPubFormatted: formatPublicKey(userData.userPub),
             error: null,
             loading: false
           });
@@ -229,6 +243,7 @@ export function useShogunAuth() {
         isAuthenticated: false,
         username: null,
         userPub: null,
+        userPubFormatted: null,
         error: null,
         loading: false
       });
@@ -245,7 +260,7 @@ export function useShogunAuth() {
     
     const currentUrl = window.location.href;
     const authUrl = `http://localhost:8080?redirect=${encodeURIComponent(currentUrl)}`;
-            console.log('🔄 Reindirizzamento da HAL 9000 a Shogun Auth:', authUrl);
+    console.log('🔄 Reindirizzamento da HAL 9000 a Shogun Auth:', authUrl);
     window.location.href = authUrl;
   };
 

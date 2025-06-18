@@ -41,10 +41,25 @@ const HeadLink = styled(Link)`
    margin-left: 0px;
    padding-bottom: 8px;
 `
-const User = styled.div`
-   margin-top: 5px;
-   text-decoration: none;
+const Username = styled.div`
+   padding: 3px 8px;
+   background-color: var(--accent-color);
+   border-radius: 12px;
    font-weight: 600;
+   margin-right: 8px;
+   font-size: 14px;
+   display: flex;
+   align-items: center;
+   
+   &.shogun-user {
+      background-color: #28a745;
+      color: white;
+   }
+   
+   .verified-badge {
+      margin-left: 4px;
+      font-size: 11px;
+   }
 `
 
 const Message = styled.div`
@@ -59,6 +74,9 @@ const Title = styled.h4`
 const Menu = styled.div`
    flex: 1;
    display: flex;
+   align-items: center;
+   flex-wrap: wrap;
+   
    .simpleIcon {
       color: red;
       margin-left: 5px;
@@ -75,10 +93,37 @@ const Menu = styled.div`
    .ogLink {
       padding-left: 7px;
       padding-top: 4px;
+      
+      a {
+         display: inline-flex;
+         align-items: center;
+         text-decoration: none;
+         color: #1a73e8;
+         font-weight: 500;
+         
+         &:before {
+            content: "🔗";
+            margin-right: 3px;
+         }
+         
+         &:hover {
+            text-decoration: underline;
+         }
+      }
    }
    .nodeLink {
       padding-left: 7px;
       padding-top: 4px;
+      
+      a {
+         text-decoration: none;
+         color: #333;
+         font-weight: 500;
+         
+         &:hover {
+            text-decoration: underline;
+         }
+      }
    }
 `
 
@@ -88,6 +133,16 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
    const [isShowAdvanced, showAdvanced] = useState<boolean>(false)
    const [views] = useViewCount(node.key)
    const keypressed = useKeyboard(['v'])
+   
+   // Verifica se l'URL esiste e non è vuoto
+   const hasValidUrl = node?.url && typeof node.url === 'string' && node.url.trim().length > 0
+   
+   // DEBUG - Log del nodo per verificare i dati
+   useEffect(() => {
+      console.log("🔍 [List/ViewNode] Dati del nodo:", node);
+      console.log("🔍 [List/ViewNode] URL presente:", node?.url);
+      console.log("🔍 [List/ViewNode] hasValidUrl:", hasValidUrl);
+   }, [node, hasValidUrl]);
 
    const derefNode = () => {
       if (!node.key) {
@@ -143,12 +198,20 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
          )}
          <br />
          <Menu>
-            {node.user && <User>@{node.user}</User>}
+            {node.user && (
+               <Username className={node.userType === 'shogun' ? 'shogun-user' : ''}>
+                  @{node.user}
+                  {node.userType === 'shogun' && (
+                     <span className="verified-badge">✓</span>
+                  )}
+               </Username>
+            )}
             {node.date && <TimeAgo date={node.date}></TimeAgo>}
             <ViewCount count={views} />
-            {node.url && (
+            
+            {hasValidUrl && (
                <div className="ogLink">
-                  <a href={node.url} target="_blank">
+                  <a href={node.url} target="_blank" rel="noopener noreferrer">
                      og-link
                   </a>
                </div>

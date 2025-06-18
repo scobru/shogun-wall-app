@@ -225,6 +225,28 @@ const ViewPost: React.FC = () => {
                </div>
             </PostHeaderStyled>
             
+            {/* OG Link se presente */}
+            {post?.url && (
+               <div style={{ 
+                  marginBottom: '15px', 
+                  padding: '8px 12px', 
+                  backgroundColor: '#f8f9fa', 
+                  borderRadius: '6px', 
+                  border: '1px solid #e9ecef',
+                  fontSize: '14px'
+               }}>
+                  <span style={{ fontWeight: 'bold', marginRight: '8px' }}>URL Esterno:</span>
+                  <a 
+                     href={post.url} 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     style={{ color: '#0366d6', textDecoration: 'none' }}
+                  >
+                     {post.url}
+                  </a>
+               </div>
+            )}
+            
             {/* Contenuto del post */}
             <div dangerouslySetInnerHTML={createMarkup(post?.content || tempContent)} />
          </PostStyled>

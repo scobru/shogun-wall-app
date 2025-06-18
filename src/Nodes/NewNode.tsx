@@ -37,7 +37,7 @@ const NewNode = (props: NewSubNodeProps) => {
       setValue('id', makeId(7, [IdTypes.lower, IdTypes.numbers]))
       // Usa l'utente autenticato invece di uno random
       setValue('user', auth.isAuthenticated 
-         ? (auth.userPub || auth.currentUsername || 'shogun_user')
+         ? (auth.username || 'shogun_user')
          : (auth.currentUsername || getRandomUsername())
       )
    }, [auth.isAuthenticated, auth.userPub, auth.currentUsername])
@@ -69,7 +69,7 @@ const NewNode = (props: NewSubNodeProps) => {
             <strong>Creando come: </strong>
             <span style={{ color: auth.isAuthenticated ? '#28a745' : '#6c757d' }}>
                {auth.isAuthenticated 
-                  ? (auth.userPub?.substring(0, 12) + '...' || auth.currentUsername || 'Shogun User')
+                  ? (auth.username || 'Shogun User')
                   : (auth.currentUsername || 'Guest User')
                }
                {auth.isAuthenticated && (
@@ -143,6 +143,26 @@ const NewNode = (props: NewSubNodeProps) => {
                content={''}
             />
          </FormItem>
+         
+         {/* URL per og-link */}
+         <FormItem className={errors['url'] ? 'error' : ''}>
+            <Label>URL (og-link):</Label>
+            <Input
+               register={register}
+               name={'url'}
+               onKeyPress={handleUserKeyPress}
+               placeholder="https://example.com"
+            />
+            <div style={{ 
+               marginTop: '4px', 
+               fontSize: '12px', 
+               color: '#6c757d',
+               padding: '4px'
+            }}>
+               Inserisci un URL esterno da mostrare come og-link
+            </div>
+         </FormItem>
+         
          {/*  ID */}
          <FormItem
             hidden={showAdvanced}
@@ -191,7 +211,7 @@ const NewNode = (props: NewSubNodeProps) => {
                   fontSize: '12px',
                   color: '#155724'
                }}>
-                  <strong>User ID:</strong> {auth.userPub?.substring(0, 20)}...
+                  <strong>User ID:</strong> {auth.userPubFormatted || ''}
                </div>
             </FormItem>
          )}

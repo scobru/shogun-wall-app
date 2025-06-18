@@ -222,6 +222,26 @@ const ViewPostList = () => {
                      dangerouslySetInnerHTML={createMarkup(post.content)}
                   />
                   
+                  {/* Mostra indicatore og-link se presente */}
+                  {post.url && (
+                     <div style={{ 
+                        marginTop: '10px', 
+                        fontSize: '12px', 
+                        display: 'flex', 
+                        alignItems: 'center'
+                     }}>
+                        <span style={{ 
+                           padding: '2px 6px', 
+                           backgroundColor: '#e8f0fe', 
+                           color: '#1a73e8', 
+                           borderRadius: '10px', 
+                           fontWeight: 'bold'
+                        }}>
+                           🔗 og-link
+                        </span>
+                     </div>
+                  )}
+                  
                   {/* Azioni del post - mostra solo se l'utente può modificarlo */}
                   {canEditPost(post) && (
                      <div className="post-actions">
