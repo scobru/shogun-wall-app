@@ -29,4 +29,16 @@ export type DungeonNode = {
    downVotes: number
    content: string // comes from the original node.blog.post type
    title?: string // comes from the node.dashboard type
+   
+   // Nuove proprietà aggiunte per l'autenticazione e metadata
+   userPub?: string | null // Public key dell'utente Shogun
+   userId?: string | null // ID dell'utente (stesso valore di userPub)
+   userType?: 'shogun' | 'guest' | 'legacy' // Tipo di utente
+   timestamp?: number // Timestamp di creazione (più preciso di date)
+   
+   // Proprietà per organizzazione e categorizzazione
+   category?: string // Categoria del post/nodo
+   hashtags?: string // Hashtags del post/nodo
+   description?: string // Descrizione del post (per i blog posts)
+   image?: string // URL dell'immagine del post
 }

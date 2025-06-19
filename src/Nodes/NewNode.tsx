@@ -40,7 +40,9 @@ const NewNode = (props: NewSubNodeProps) => {
          ? (auth.username || 'shogun_user')
          : (auth.currentUsername || getRandomUsername())
       )
-   }, [auth.isAuthenticated, auth.userPub, auth.currentUsername])
+      // Register URL field explicitly
+      register('url', { required: false })
+   }, [auth.isAuthenticated, auth.userPub, auth.currentUsername, register])
 
    useEffect(() => {
       if (keypressed === 'v') {
@@ -53,6 +55,18 @@ const NewNode = (props: NewSubNodeProps) => {
          e.preventDefault()
          handleSubmit(createNode as SubmitHandler<FieldValues>)()
       }
+   }
+
+   // Debug function to wrap createNode
+   const createNodeWithDebug = (data: any) => {
+      console.log('🔥 NEW NODE: Form submitted with data:', data)
+      console.log('🔗 NEW NODE: URL field specifically:', {
+         url: data.url,
+         urlType: typeof data.url,
+         urlLength: data.url ? data.url.length : 0,
+         isEmpty: !data.url || data.url.trim() === ''
+      })
+      createNode(data)
    }
 
    return (
@@ -94,8 +108,7 @@ const NewNode = (props: NewSubNodeProps) => {
             className={errors['directionText'] ? 'error' : ''}
          >
             <Input
-               register={register}
-               name={'directionText'}
+               {...register('directionText')}
                onKeyPress={handleUserKeyPress}
                placeholder={getRandomFromArray(['Title'])}
             />
@@ -104,8 +117,7 @@ const NewNode = (props: NewSubNodeProps) => {
          {/* Start (if in dashboard mode) */}
          <FormItem hidden={!props.dashboardFeature && !showAdvanced}>
             <Input
-               register={register}
-               name={'start'}
+               {...register('start')}
                onKeyPress={handleUserKeyPress}
                placeholder={getRandomFromArray(['Start', 'Pre'])}
             />
@@ -113,8 +125,7 @@ const NewNode = (props: NewSubNodeProps) => {
          {/* End (if in dashboard mode) */}
          <FormItem hidden={!props.dashboardFeature}>
             <Input
-               register={register}
-               name={'end'}
+               {...register('end')}
                onKeyPress={handleUserKeyPress}
                placeholder={getRandomFromArray(['End', 'Post'])}
             />
@@ -148,8 +159,7 @@ const NewNode = (props: NewSubNodeProps) => {
          <FormItem className={errors['url'] ? 'error' : ''}>
             <Label>URL (og-link):</Label>
             <Input
-               register={register}
-               name={'url'}
+               {...register('url')}
                onKeyPress={handleUserKeyPress}
                placeholder="https://example.com"
             />
@@ -162,6 +172,42 @@ const NewNode = (props: NewSubNodeProps) => {
                Inserisci un URL esterno da mostrare come og-link
             </div>
          </FormItem>
+
+         {/* Categoria */}
+         <FormItem className={errors['category'] ? 'error' : ''}>
+            <Label>Categoria:</Label>
+            <Input
+               {...register('category')}
+               onKeyPress={handleUserKeyPress}
+               placeholder="es. Tech, Ideas, Discussion"
+            />
+            <div style={{ 
+               marginTop: '4px', 
+               fontSize: '12px', 
+               color: '#6c757d',
+               padding: '4px'
+            }}>
+               Categoria principale del nodo (opzionale)
+            </div>
+         </FormItem>
+
+         {/* Hashtags */}
+         <FormItem className={errors['hashtags'] ? 'error' : ''}>
+            <Label>Hashtags:</Label>
+            <Input
+               {...register('hashtags')}
+               onKeyPress={handleUserKeyPress}
+               placeholder="#idea #discussion #brainstorm"
+            />
+            <div style={{ 
+               marginTop: '4px', 
+               fontSize: '12px', 
+               color: '#6c757d',
+               padding: '4px'
+            }}>
+               Hashtags separati da spazi (es: #idea #tech #discussion)
+            </div>
+         </FormItem>
          
          {/*  ID */}
          <FormItem
@@ -169,8 +215,7 @@ const NewNode = (props: NewSubNodeProps) => {
             className={errors['id'] ? 'error' : ''}
          >
             <Input
-               register={register}
-               name={'id'}
+               {...register('id')}
                onKeyPress={handleUserKeyPress}
                placeholder={getRandomFromArray(['Id', 'HashKey', 'Path'])}
             />
@@ -178,8 +223,7 @@ const NewNode = (props: NewSubNodeProps) => {
          {/* Head */}
          <FormItem hidden={!showAdvanced}>
             <Input
-               register={register}
-               name={'head'}
+               {...register('head')}
                onKeyPress={handleUserKeyPress}
                placeholder={getRandomFromArray(['Previous', 'Parent'])}
             />
@@ -190,8 +234,7 @@ const NewNode = (props: NewSubNodeProps) => {
             hidden={auth.isAuthenticated} // Nascondi se autenticato
          >
             <Input
-               register={register}
-               name={'user'}
+               {...register('user')}
                onKeyPress={handleUserKeyPress}
                placeholder={getRandomFromArray([
                   'User ID',
@@ -220,7 +263,7 @@ const NewNode = (props: NewSubNodeProps) => {
             <Button
                /* @ts-ignore */
                disabled={loading || errors.length}
-               onClick={handleSubmit(createNode as SubmitHandler<FieldValues>)}
+               onClick={handleSubmit(createNodeWithDebug as SubmitHandler<FieldValues>)}
             >
                {getRandomFromArray(['Add', 'Create'])}
             </Button>

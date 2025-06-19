@@ -137,11 +137,18 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
    // Verifica se l'URL esiste e non è vuoto
    const hasValidUrl = node?.url && typeof node.url === 'string' && node.url.trim().length > 0
    
-   // DEBUG - Log del nodo per verificare i dati
+   // DEBUG DETTAGLIATO - Log del nodo per verificare i dati
    useEffect(() => {
-      console.log("🔍 [List/ViewNode] Dati del nodo:", node);
-      console.log("🔍 [List/ViewNode] URL presente:", node?.url);
-      console.log("🔍 [List/ViewNode] hasValidUrl:", hasValidUrl);
+      console.log("🔍 [List/ViewNode] DEBUG DETTAGLIATO:", {
+         nodeKey: node.key,
+         nodeUser: node.user,
+         nodeUserType: node.userType,
+         rawUrl: node?.url,
+         urlType: typeof node?.url,
+         urlTrimmed: node?.url ? node.url.trim() : null,
+         hasValidUrl: hasValidUrl,
+         allNodeData: node
+      });
    }, [node, hasValidUrl]);
 
    const derefNode = () => {

@@ -1,11 +1,12 @@
-import Helmet from 'react-helmet'
+import { useEffect } from 'react'
 
 const NodesLanding = () => {
+    useEffect(() => {
+        document.title = 'List Nodes'
+    }, [])
+
     return (
         <>
-            <Helmet>
-                <title>List Nodes</title>
-            </Helmet>
             <h3>Nodes Landing Page</h3>
         </>
     )

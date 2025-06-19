@@ -19,23 +19,23 @@ const useCreateNodeWithAuth = (onNodeCreated?: (node: any) => void, model: strin
    const auth = useAuth()
 
    const createNode = (data: any) => {
-      console.log(`creating node with auth`)
-      console.log(data)
+      console.log(`🏗️ creating node with auth`)
+      console.log('🏗️ Dati ricevuti dal form:', data)
       if (!data) {
-         console.error('Dati mancanti per la creazione del nodo')
+         console.error('❌ Dati mancanti per la creazione del nodo')
          return
       }
       
       // Verifica che l'ID o la chiave non sia undefined
       const key = data.key || data.id;
       if (!key) {
-         console.error('Key o ID mancante')
+         console.error('❌ Key o ID mancante')
          return
       }
       
       // Verifica che il messaggio non sia undefined
       if (data.message === undefined && !data.directionText) {
-         console.error('Il messaggio non può essere vuoto')
+         console.error('❌ Il messaggio non può essere vuoto')
          data.message = "<p>Nessun messaggio</p>" // Imposta un valore predefinito
       }
       
@@ -51,9 +51,14 @@ const useCreateNodeWithAuth = (onNodeCreated?: (node: any) => void, model: strin
          }
       }
       
-      // Log per debug
-      console.log('🔗 URL fornito nel form:', data.url);
-      console.log('🔗 URL elaborato:', url);
+      // DEBUG DETTAGLIATO per URL
+      console.log('🔗 ===== DEBUG URL DETTAGLIATO =====');
+      console.log('🔗 URL originale dal form:', data.url);
+      console.log('🔗 Tipo URL originale:', typeof data.url);
+      console.log('🔗 URL dopo trim:', data.url ? data.url.trim() : null);
+      console.log('🔗 URL finale elaborato:', url);
+      console.log('🔗 Sarà incluso nei dati?', url ? 'SÌ' : 'NO');
+      console.log('🔗 ================================');
       
       // Aggiungi automaticamente l'autore del nodo
       let enrichedData = {
@@ -71,16 +76,19 @@ const useCreateNodeWithAuth = (onNodeCreated?: (node: any) => void, model: strin
       // Aggiungiamo l'URL solo se esiste e non è vuoto
       if (url && url !== '') {
          enrichedData.url = url;
-         console.log('🔗 URL aggiunto ai dati arricchiti:', url);
+         console.log('✅ URL aggiunto ai dati arricchiti:', url);
       } else {
-         console.log('🔗 Nessun URL valido fornito');
+         console.log('❌ Nessun URL valido fornito - verrà omesso dai dati');
       }
       
       // Rimuoviamo tutte le proprietà undefined che possono causare errori
       enrichedData = removeUndefinedProps(enrichedData);
       
-      // Debug per verificare i dati arricchiti
-      console.log('Dati arricchiti e puliti:', enrichedData);
+      // Debug finale per verificare i dati arricchiti
+      console.log('🏗️ ===== DATI FINALI PRIMA DEL SALVATAGGIO =====');
+      console.log('🏗️ Dati completi:', enrichedData);
+      console.log('🏗️ URL nei dati finali:', enrichedData.url);
+      console.log('🏗️ ===============================================');
       
       setLoading(true)
 
@@ -105,14 +113,16 @@ const useCreateNodeWithAuth = (onNodeCreated?: (node: any) => void, model: strin
                   .get(key)
                   .once((savedNode) => {
                      if (!savedNode) {
-                        console.warn('Il nodo salvato è vuoto')
+                        console.warn('❌ Il nodo salvato è vuoto')
                         return
                      }
                      
-                     console.log('Nodo salvato:', savedNode)
-                     if (savedNode.url) {
-                        console.log('URL nel nodo salvato:', savedNode.url)
-                     }
+                     console.log('🎯 ===== VERIFICA NODO SALVATO =====')
+                     console.log('🎯 Nodo salvato:', savedNode)
+                     console.log('🎯 URL nel nodo salvato:', savedNode.url)
+                     console.log('🎯 Tipo URL nel nodo salvato:', typeof savedNode.url)
+                     console.log('🎯 Ha URL valido?', savedNode.url ? 'SÌ' : 'NO')
+                     console.log('🎯 ==================================')
                      
                      // Se questo è un commento (ha proprietà head), collegalo al post padre
                      if (data.head) {

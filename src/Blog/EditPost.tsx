@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import Helmet from 'react-helmet'
 import { useForm } from 'react-hook-form'
 import { Button, Input, Label, FormItem, Textarea } from '../Interface'
 import useUpdateWithAuth from '../api/useUpdateWithAuth'
@@ -9,15 +8,9 @@ import Tiptap from '../Interface/TipTap'
 import useGet from '../api/useGet'
 import { useParams } from 'react-router-dom'
 import LoadingWheel from '../Interface/LoadingWheel'
-import styled from 'styled-components'
-
-const EditPostStyled = styled.div`
-   display: flex;
-   flex-direction: column;
-`
 
 const EditPost = () => {
-   const [createNode, loading, node] = useUpdateWithAuth('post')
+   const [saveNode, loading, node] = useUpdateWithAuth('post')
    const params = useParams()
    const key = params.key
    const post = useGet(key, 'post', true)
@@ -46,54 +39,56 @@ const EditPost = () => {
       setValue('description', post.description)
       setValue('url', post.url)
       setValue('image', post.image)
+      setValue('category', post.category)
+      setValue('hashtags', post.hashtags ? post.hashtags.replace(/,/g, ' ') : '')
+   }, [post])
+
+   useEffect(() => {
+      if (post) {
+         document.title = `Edit Post ${post.key}`
+      } else {
+         document.title = 'Edit Post'
+      }
    }, [post])
 
    if (!post) {
       return (
-         <>
-            <Helmet>
-               <title>Edit Post</title>
-            </Helmet>
-            Loading
+         <div className="flex flex-col items-center p-4">
+            <div className="text-lg mb-4">Loading</div>
             <LoadingWheel />
-         </>
+         </div>
       )
    }
 
    return (
-      <EditPostStyled>
-         <Helmet>
-            <title>Edit Post {post?.key}</title>
-         </Helmet>
+      <div className="edit-post-container">
 
          {/* Mostra l'utente corrente */}
-         <div style={{ 
-            marginBottom: '20px', 
-            padding: '10px', 
-            backgroundColor: '#f5f5f5', 
-            borderRadius: '5px',
-            border: '1px solid #ddd'
-         }}>
+         <div className="mb-5 p-2.5 bg-base-200 rounded-lg border border-base-300">
+            <div className="flex items-center justify-between">
+               <div>
             <strong>Modificando come: </strong>
-            <span style={{ color: auth.isAuthenticated ? '#4CAF50' : '#666' }}>
+                  <span className={auth.isAuthenticated ? 'text-success' : 'text-base-content/70'}>
                {auth.currentUsername || 'Anonymous'}
                {auth.isAuthenticated && ' (Shogun ✓)'}
+                  </span>
+               </div>
                {!auth.hasAnyAuth && (
-                  <span style={{ marginLeft: '10px' }}>
                      <Button 
                         onClick={auth.redirectToAuth} 
-                        style={{ fontSize: '12px', padding: '2px 8px' }}
+                     size="xs"
+                     variant="primary"
                      >
                         Accedi con Shogun
                      </Button>
-                  </span>
                )}
-            </span>
+            </div>
          </div>
 
-         <FormItem className={errors['key'] ? 'error' : ''}>
-            <Label>
+         <FormItem error={!!errors['key']}>
+            <Label required>
                Slug:
+            </Label>
                <Input
                   {...register('key', {
                      required: true,
@@ -104,26 +99,26 @@ const EditPost = () => {
                      },
                   })}
                />
-            </Label>
          </FormItem>
 
-         <FormItem className={errors['title'] ? 'error' : ''}>
-            <Label>
+         <FormItem error={!!errors['title']}>
+            <Label required>
                Title:
-               <Input {...register('title', { required: true })} />
             </Label>
+            <Input {...register('title', { required: true })} />
          </FormItem>
 
-         <FormItem className={errors['description'] ? 'error' : ''}>
-            <Label>
+         <FormItem error={!!errors['description']}>
+            <Label required>
                Description:
-               <Textarea {...register('description', { required: true })} />
             </Label>
+            <Textarea {...register('description', { required: true })} />
          </FormItem>
 
-         <FormItem className={errors['url'] ? 'error' : ''}>
+         <FormItem error={!!errors['url']}>
             <Label>
                URL (og-link):
+            </Label>
                <Input 
                   {...register('url', { 
                      required: false,
@@ -134,24 +129,49 @@ const EditPost = () => {
                   })} 
                   placeholder="https://example.com"
                />
-            </Label>
-            <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+            <div className="text-xs text-base-content/70 mt-1">
                Inserisci un URL per aggiungere un og-link al post
             </div>
          </FormItem>
 
-         <FormItem className={errors['image'] ? 'error' : ''}>
+         <FormItem error={!!errors['image']}>
             <Label>
                Image (url/blob):
-               <Input {...register('image', { required: false })} />
             </Label>
+               <Input {...register('image', { required: false })} />
+         </FormItem>
+
+         <FormItem error={!!errors['category']}>
+            <Label>
+               Categoria:
+            </Label>
+            <Input 
+               {...register('category', { required: false })} 
+               placeholder="es. Tech, Lifestyle, Tutorial"
+            />
+            <div className="text-xs text-base-content/70 mt-1">
+               Categoria principale del post (opzionale)
+            </div>
+         </FormItem>
+
+         <FormItem error={!!errors['hashtags']}>
+            <Label>
+               Hashtags:
+            </Label>
+            <Input 
+               {...register('hashtags', { required: false })} 
+               placeholder="#react #typescript #webdev"
+            />
+            <div className="text-xs text-base-content/70 mt-1">
+               Hashtags separati da spazi (es: #react #tutorial #webdev)
+            </div>
          </FormItem>
 
          <FormItem
-            className={errors['content'] ? 'error' : ''}
+            error={!!errors['content']}
             flexDirection="column"
          >
-            <Label>Content:</Label>
+            <Label required>Content:</Label>
             <Tiptap
                onChange={(value) => setValue('content', value)}
                content={post.content}
@@ -159,13 +179,15 @@ const EditPost = () => {
          </FormItem>
 
          <Button
-            disabled={loading || errors.length}
-            onClick={handleSubmit(createNode)}
+            disabled={loading || Object.keys(errors).length > 0}
+            onClick={handleSubmit(saveNode)}
+            loading={loading}
+            className="w-full"
          >
             {!loading && 'Save'}
             {loading && 'Loading'}
          </Button>
-      </EditPostStyled>
+      </div>
    )
 }
 

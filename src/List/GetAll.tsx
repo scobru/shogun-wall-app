@@ -9,6 +9,7 @@ import moment from 'moment'
 import { isNull, isString, random } from 'lodash'
 import { TimeAgo } from './TimeAgo'
 import delay from './delay'
+import NodeListFilter from './NodeListFilter'
 
 const GetAllStyled = styled.div`
    .loadingwheel {
@@ -36,6 +37,7 @@ const ListNodes = styled.div`
    display: flex;
    flex-direction: column;
    width: 90%;
+   margin: 0 auto;
    @media only screen and (min-width: 600px) {
       width: 520px;
    }
@@ -136,6 +138,7 @@ const SearchHighlights = ({
 
 const GetAll = () => {
    const [nodes, setNodes] = useState<DungeonNode[] | any[]>([])
+   const [filteredNodes, setFilteredNodes] = useState<DungeonNode[] | any[]>([])
    const [longLoad, setLongLoad] = useState<boolean>(false)
    const [searchState, dispatch] = useReducer(searchStateReducer, {
       ticks: 0,
@@ -317,10 +320,16 @@ const GetAll = () => {
          )}
          <ListNodesWrapper>
             <ListNodes>
-               {nodes.length && (
-                  <SearchHighlights {...searchState} numNodes={nodes.length} />
+               {nodes.length > 0 && (
+                  <NodeListFilter 
+                     nodes={nodes} 
+                     onFilteredNodesChange={setFilteredNodes} 
+                  />
                )}
-               {nodes.map((node) => (
+               {nodes.length && (
+                  <SearchHighlights {...searchState} numNodes={filteredNodes.length || nodes.length} />
+               )}
+               {(filteredNodes.length > 0 ? filteredNodes : nodes).map((node) => (
                   <ViewNode
                      node={node}
                      key={node.key}

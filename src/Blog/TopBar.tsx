@@ -11,12 +11,18 @@ import { Button } from 'Interface'
 import { DarkToggle } from './DarkToggle'
 
 const TopBarStyled = styled.div`
-   box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
-      rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+   background: var(--win95-silver);
+   border: 2px solid;
+   border-color: var(--win95-light-gray) var(--win95-dark-gray) var(--win95-dark-gray) var(--win95-light-gray);
+   border-bottom: 1px solid var(--win95-dark-gray);
 
    display: flex;
    justify-content: flex-start;
-   padding: 0.4rem 0rem;
+   align-items: center;
+   padding: 4px 8px;
+   gap: 4px;
+   height: 32px;
+   
    .beta {
       transform: rotate(180deg);
       color: #f8633c;
@@ -26,32 +32,72 @@ const TopBarStyled = styled.div`
       margin-left: 3px;
       margin-bottom: 8px;
    }
+   
    .nav {
       display: flex;
-      margin-left: 1em;
-      padding-top: 4px;
-   }
-   .usernameSession {
-      input {
-         height: 30px;
-      }
-   }
-   .newNode button {
-      display: flex;
       align-items: center;
-      margin-top: 5px;
-      margin-left: 10px;
-      height: 30px;
-      font-weight: 800;
-      font-size: 1rem;
-      div {
-         margin-left: 4px;
+      gap: 0.5rem;
+   }
+   
+   .nav-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: var(--win95-silver);
+      color: var(--win95-black);
+      border: 1px solid;
+      border-color: var(--win95-light-gray) var(--win95-dark-gray) var(--win95-dark-gray) var(--win95-light-gray);
+      border-radius: 0;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: normal;
+      font-family: 'MS Sans Serif', sans-serif;
+      cursor: pointer;
+      min-height: 20px;
+      
+      &:hover {
+         background: #d4d0c8;
       }
-      img {
-         height: 27px;
-         padding-bottom: 5px;
-         padding-top: 4px;
-         padding-left: 5px;
+      
+      &:active {
+         border-color: var(--win95-dark-gray) var(--win95-light-gray) var(--win95-light-gray) var(--win95-dark-gray);
+         padding: 5px 7px 3px 9px;
+      }
+      
+      &.primary {
+         background: var(--hal-red);
+         color: var(--win95-white);
+         border-color: var(--hal-red-light) var(--hal-red-dark) var(--hal-red-dark) var(--hal-red-light);
+         
+         &:hover {
+            background: var(--hal-red-dark);
+         }
+         
+         &:active {
+            border-color: var(--hal-red-dark) var(--hal-red-light) var(--hal-red-light) var(--hal-red-dark);
+         }
+      }
+   }
+   
+   .usernameSession {
+      margin-left: auto;
+      
+      input {
+         height: 20px;
+         padding: 2px 4px;
+         border: 1px solid;
+         border-color: var(--win95-dark-gray) var(--win95-light-gray) var(--win95-light-gray) var(--win95-dark-gray);
+         border-radius: 0;
+         background: var(--win95-white);
+         color: var(--win95-black);
+         font-size: 11px;
+         font-family: 'MS Sans Serif', sans-serif;
+         
+         &:focus {
+            outline: 1px dotted var(--win95-black);
+            outline-offset: -2px;
+         }
       }
    }
    .logo {
@@ -59,55 +105,33 @@ const TopBarStyled = styled.div`
       align-items: center;
       text-decoration: none;
       .halText {
-         margin-top: -5px;
-         margin-left: 5px;
-         color: var(--text-color);
-         font-family: 'Work Sans', sans-serif;
-         font-weight: 800;
-         font-size: 24px;
-         background: linear-gradient(
-            45deg,
-            var(--hal-red) 0%,
-            #ff3333 25%,
-            #cc0000 50%,
-            #990000 75%,
-            var(--hal-red-dark) 100%
-         );
-         background-size: 200% auto;
-         background-clip: text;
-         -webkit-background-clip: text;
-         -webkit-text-fill-color: transparent;
-         animation: halGlow 3s ease-in-out infinite;
-         position: relative;
-         text-shadow: 0 0 10px rgba(204, 0, 0, 0.3);
+         margin-top: 0;
+         margin-left: 6px;
+         color: var(--hal-red);
+         font-family: 'MS Sans Serif', sans-serif;
+         font-weight: bold;
+         font-size: 14px;
+         text-shadow: 1px 1px 0 var(--win95-light-gray);
+         letter-spacing: 1px;
          
-         &::after {
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--hal-red);
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform 0.4s ease-out;
-            box-shadow: 0 0 5px var(--hal-red);
+         &::before {
+            content: "●";
+            color: var(--hal-red);
+            margin-right: 4px;
+            animation: halBlink 2s ease-in-out infinite;
          }
          
-         &:hover::after {
-            transform: scaleX(1);
-            transform-origin: left;
-         }
-         
-         @keyframes halGlow {
-            0%, 100% {
-               background-position: 0% 50%;
-               filter: brightness(1);
+         @keyframes halBlink {
+            0%, 80% { 
+               opacity: 1;
+               text-shadow: 0 0 4px var(--hal-red);
             }
-            50% {
-               background-position: 100% 50%;
-               filter: brightness(1.2);
+            90% { 
+               opacity: 0.3;
+            }
+            100% { 
+               opacity: 1;
+               text-shadow: 0 0 6px var(--hal-red);
             }
          }
       }
@@ -125,30 +149,39 @@ const TopBar = () => {
    }, [])
    return (
       <TopBarStyled>
-         {' '}
          <Link to="/all" className="logo">
-            {' '}
             <div className="halText">HAL 9000</div>
          </Link>
-         <Link to="/node/new" className="newNode">
-            <Button>
-               <div>New</div>
-               <img src={RandomLogo} alt="HAL Interface" />
-            </Button>
-         </Link>
+         
          <div className="nav">
+            <Link to="/node/new" className="nav-button primary">
+               <div>New</div>
+               <img src={RandomLogo} alt="HAL Interface" style={{ 
+                  height: '16px', 
+                  filter: 'brightness(0) invert(1)' 
+               }} />
+            </Link>
+            
+            <Link to="/blog" className="nav-button">
+               📝 Blog
+            </Link>
+            
+            <Link to="/archive" className="nav-button">
+               🗄️ Archive
+         </Link>
+            
             {clock && (
-               <DropDownStyled>
-                  <Link to="/dashboard/clock">{clock.directionText}</Link>
-               </DropDownStyled>
+               <Link to="/dashboard/clock" className="nav-button">
+                  🕐 {clock.directionText}
+               </Link>
             )}
          </div>
+         
          <div className="usernameSession">
             <UsernameSession />
          </div>
-         <div className="darkToggle">
+         
             <DarkToggle />
-         </div>
       </TopBarStyled>
    )
 }

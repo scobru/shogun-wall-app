@@ -1,25 +1,37 @@
-import styled from 'styled-components'
+import React from 'react'
 
-export const itemBorder = `dashed indigo thin`
-
-type IFormItem = {
-    hidden?: Boolean
-    flexDirection?: 'column' | 'row'
+interface FormItemProps {
+  children: React.ReactNode
+  hidden?: boolean
+  flexDirection?: 'column' | 'row'
+  className?: string
+  error?: boolean
 }
 
-const FormItem = styled.div<IFormItem>`
-    display: ${(props) => (props.hidden ? 'none' : 'flex')};
-    flex-direction: ${(props) =>
-        props.flexDirection ? props.flexDirection : 'inherit'};
-    padding: 1rem 1rem 1rem 1rem;
-    border: ${itemBorder};
-    border-bottom: none;
-    &:last-child {
-        border-bottom: ${itemBorder};
-    }
-    &.error label {
-        color: red;
-    }
-`
+export const FormItem: React.FC<FormItemProps> = ({
+  children,
+  hidden = false,
+  flexDirection = 'column',
+  className = '',
+  error = false,
+  ...props
+}) => {
+  if (hidden) return null
+  
+  const classes = [
+    'form-control',
+    'w-full',
+    'mb-4',
+    flexDirection === 'row' ? 'flex-row items-center gap-4' : 'flex-col',
+    error ? 'has-error' : '',
+    className
+  ].filter(Boolean).join(' ')
+  
+  return (
+    <div className={classes} {...props}>
+      {children}
+    </div>
+  )
+}
 
 export default FormItem
