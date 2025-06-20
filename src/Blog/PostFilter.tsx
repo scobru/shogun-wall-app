@@ -126,24 +126,24 @@ const PostFilter: React.FC<PostFilterProps> = ({ posts, onFilteredPosts }) => {
          
          {/* Ricerca testuale */}
          <div className="filter-section mb-3">
-            <div className="text-sm font-semibold text-base-content mb-2">🔍 Cerca nei post</div>
+            <div className="text-sm font-semibold text-base-content mb-2">Cerca nei post</div>
             <input
                type="text"
-               className="input input-bordered w-full text-sm"
-               placeholder="Cerca per titolo, contenuto o categoria..."
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
+               placeholder="Cerca per titolo, contenuto o categoria..."
+               className="input input-bordered w-full text-sm"
             />
          </div>
 
-         {/* Categorie */}
-         <div className="filter-section mb-3">
-            <div className="text-sm font-semibold text-base-content mb-2">
-               📂 Categorie ({allCategories.length})
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-               {allCategories.length > 0 ? (
-                  allCategories.map(category => (
+         {/* Filtro per categoria */}
+         {allCategories.length > 0 && (
+            <div className="filter-section mb-3">
+               <div className="text-sm font-semibold text-base-content mb-2">
+                  Categorie ({allCategories.length})
+               </div>
+               <div className="flex flex-wrap gap-1.5">
+                  {allCategories.map(category => (
                      <span
                         key={category}
                         className={`badge cursor-pointer transition-colors ${
@@ -155,19 +155,15 @@ const PostFilter: React.FC<PostFilterProps> = ({ posts, onFilteredPosts }) => {
                      >
                         {category}
                      </span>
-                  ))
-               ) : (
-                  <div className="text-xs text-base-content/60 italic p-1">
-                     Nessuna categoria disponibile. Crea un post con categoria per iniziare!
-                  </div>
-               )}
+                  ))}
+               </div>
             </div>
-         </div>
+         )}
 
          {/* Hashtags */}
          <div className="filter-section mb-3">
             <div className="text-sm font-semibold text-base-content mb-2">
-               🏷️ Hashtags ({allHashtags.length})
+               Hashtags ({allHashtags.length})
             </div>
             <div className="flex flex-wrap gap-1.5">
                {allHashtags.length > 0 ? (
@@ -198,7 +194,7 @@ const PostFilter: React.FC<PostFilterProps> = ({ posts, onFilteredPosts }) => {
                className="btn btn-outline btn-sm mt-2" 
                onClick={clearAllFilters}
             >
-               ❌ Cancella tutti i filtri
+               Cancella tutti i filtri
             </button>
          )}
 

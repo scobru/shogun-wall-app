@@ -2,28 +2,32 @@ import React, { useState, useEffect } from 'react'
 import styled from 'styled-components/macro'
 
 const PreviewContainer = styled.div`
-  border: 1px solid #e1e8ed;
-  border-radius: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  margin: 10px 0;
+  margin: var(--space-3) 0;
   max-width: 500px;
-  transition: box-shadow 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   
   &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-hover);
   }
 `
 
 const CompactPreviewContainer = styled.div`
-  border: 1px solid #e1e8ed;
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  margin: 6px 0;
+  margin: var(--space-2) 0;
   max-width: 400px;
-  transition: box-shadow 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
   
   &:hover {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-hover);
   }
 `
 
@@ -39,18 +43,18 @@ const CompactPreviewImage = styled.img`
   height: 60px;
   object-fit: cover;
   display: block;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 `
 
 const PreviewContent = styled.div`
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
 `
 
 const CompactPreviewContent = styled.div`
-  padding: 8px 12px;
+  padding: var(--space-2) var(--space-3);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
 `
 
 const CompactTextContent = styled.div`
@@ -59,10 +63,11 @@ const CompactTextContent = styled.div`
 `
 
 const PreviewTitle = styled.h3`
-  margin: 0 0 6px 0;
+  margin: 0 0 var(--space-2) 0;
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -71,10 +76,11 @@ const PreviewTitle = styled.h3`
 `
 
 const CompactPreviewTitle = styled.h4`
-  margin: 0 0 3px 0;
+  margin: 0 0 var(--space-1) 0;
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -83,9 +89,10 @@ const CompactPreviewTitle = styled.h4`
 `
 
 const PreviewDescription = styled.p`
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--space-2) 0;
   font-size: 14px;
-  color: #657786;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -96,7 +103,8 @@ const PreviewDescription = styled.p`
 const CompactPreviewDescription = styled.p`
   margin: 0;
   font-size: 12px;
-  color: #657786;
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -106,16 +114,20 @@ const CompactPreviewDescription = styled.p`
 
 const PreviewDomain = styled.span`
   font-size: 12px;
-  color: #657786;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 `
 
 const CompactPreviewDomain = styled.span`
   font-size: 10px;
-  color: #657786;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 `
 
 const PreviewLink = styled.a`
@@ -129,60 +141,70 @@ const PreviewLink = styled.a`
 `
 
 const LoadingContainer = styled.div`
-  padding: 16px;
+  padding: var(--space-4);
   text-align: center;
-  color: #657786;
+  color: var(--text-muted);
   font-size: 14px;
+  font-family: var(--font-sans);
 `
 
 const CompactLoadingContainer = styled.div`
-  padding: 8px;
+  padding: var(--space-2);
   text-align: center;
-  color: #657786;
+  color: var(--text-muted);
   font-size: 12px;
+  font-family: var(--font-sans);
 `
 
 const ErrorContainer = styled.div`
-  padding: 12px 16px;
-  border: 1px solid #e1e8ed;
-  border-radius: 12px;
-  margin: 10px 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  margin: var(--space-3) 0;
+  background: var(--surface);
   
   .basic-link {
-    color: #1a73e8;
+    color: var(--accent);
     text-decoration: none;
     font-weight: 500;
+    font-family: var(--font-sans);
+    transition: color 0.2s ease;
     
     &:hover {
+      color: var(--accent-hover);
       text-decoration: underline;
     }
     
     &:before {
       content: "🔗 ";
-      margin-right: 4px;
+      margin-right: var(--space-1);
     }
   }
 `
 
 const CompactErrorContainer = styled.div`
-  padding: 6px 8px;
-  border: 1px solid #e1e8ed;
-  border-radius: 8px;
-  margin: 6px 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin: var(--space-2) 0;
+  background: var(--surface);
   
   .basic-link {
-    color: #1a73e8;
+    color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     font-size: 12px;
+    font-family: var(--font-sans);
+    transition: color 0.2s ease;
     
     &:hover {
+      color: var(--accent-hover);
       text-decoration: underline;
     }
     
     &:before {
       content: "🔗 ";
-      margin-right: 4px;
+      margin-right: var(--space-1);
     }
   }
 `

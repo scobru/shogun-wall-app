@@ -3,42 +3,56 @@ import styled from 'styled-components';
 import gun, { namespace } from '../api/gun';
 
 const SearchContainer = styled.div`
-  margin-bottom: 20px;
-  background-color: var(--card-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 15px;
+  margin-bottom: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-hover);
+  }
 `;
 
 const SearchHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 `;
 
-const SearchTitle = styled.div`
+const SearchTitle = styled.h3`
+  margin: 0 0 12px 0;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-color);
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 `;
 
 const ToggleButton = styled.button`
-  background: none;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 4px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-2);
   color: var(--text-secondary);
   cursor: pointer;
   font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 500;
   transition: all 0.2s ease;
   
   &:hover {
-    background: var(--background-color);
-    border-color: var(--accent-color);
+    background: var(--surface-hover);
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+
+  &:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 `;
 
@@ -50,24 +64,25 @@ const SearchContent = styled.div<{ isOpen: boolean }>`
 
 const SearchInputContainer = styled.div`
   position: relative;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 `;
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 10px 12px 10px 35px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-10);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   font-size: 14px;
-  background: var(--background-color);
-  color: var(--text-color);
+  font-family: var(--font-sans);
+  background: var(--surface);
+  color: var(--text-primary);
   transition: all 0.2s ease;
   box-sizing: border-box;
   
   &:focus {
     outline: none;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(97, 218, 251, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
   }
   
   &::placeholder {
@@ -75,32 +90,28 @@ const SearchInput = styled.input`
   }
 `;
 
-const SearchIcon = styled.div`
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
+const SearchIcon = styled.span`
   font-size: 16px;
-  pointer-events: none;
+  color: var(--gray-500);
 `;
 
 const SearchResults = styled.div`
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid var(--border-light);
-  border-radius: 6px;
-  background: var(--background-color);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 `;
 
 const SearchResultItem = styled.div`
-  padding: 12px;
-  border-bottom: 1px solid var(--border-light);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
   cursor: pointer;
   transition: background-color 0.2s ease;
   
   &:hover {
-    background: var(--card-color);
+    background: var(--surface-hover);
   }
   
   &:last-child {
@@ -110,39 +121,46 @@ const SearchResultItem = styled.div`
 
 const ResultTitle = styled.div`
   font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 4px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
   font-size: 13px;
+  font-family: var(--font-sans);
 `;
 
 const ResultPreview = styled.div`
   font-size: 12px;
   color: var(--text-secondary);
   line-height: 1.4;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-sans);
 `;
 
 const ResultMeta = styled.div`
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   font-size: 10px;
   color: var(--text-muted);
+  font-family: var(--font-sans);
 `;
 
 const ResultsBadge = styled.span<{ type: 'post' | 'node' }>`
-  padding: 2px 6px;
-  border-radius: 10px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
   font-size: 9px;
-  font-weight: bold;
-  background: ${props => props.type === 'post' ? '#4CAF50' : '#2196F3'};
+  font-weight: 600;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: ${props => props.type === 'post' ? 'var(--success-500)' : 'var(--primary-500)'};
   color: white;
 `;
 
 const EmptyState = styled.div`
-  padding: 20px;
+  padding: var(--space-5);
   text-align: center;
   color: var(--text-muted);
   font-size: 12px;
+  font-family: var(--font-sans);
 `;
 
 interface SearchResult {
@@ -281,17 +299,15 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   return (
     <SearchContainer>
       <SearchHeader>
-        <SearchTitle>
-          🔍 Ricerca Globale
-        </SearchTitle>
+        <SearchTitle>Ricerca Globale</SearchTitle>
         <ToggleButton onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? '👁️ Nascondi' : '🔎 Espandi'}
+                      {isOpen ? 'Nascondi' : 'Espandi'}
         </ToggleButton>
       </SearchHeader>
       
       <SearchContent isOpen={isOpen}>
         <SearchInputContainer>
-          <SearchIcon>🔍</SearchIcon>
+          
           <SearchInput
             type="text"
             placeholder={placeholder}
@@ -316,18 +332,18 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
             
             {!isLoading && results.map((result) => (
               <SearchResultItem
-                key={`${result.type}-${result.id}`}
+                key={result.id}
                 onClick={() => handleResultClick(result)}
               >
                 <ResultTitle>{result.title}</ResultTitle>
                 <ResultPreview>{stripHtml(result.content)}</ResultPreview>
                 <ResultMeta>
                   <ResultsBadge type={result.type}>
-                    {result.type === 'post' ? '📝 Post' : '🔗 Nodo'}
+                                            {result.type === 'post' ? 'Post' : 'Nodo'}
                   </ResultsBadge>
-                  <span>👤 {result.author}</span>
-                  {result.date > 0 && <span>📅 {formatDate(result.date)}</span>}
-                  {result.hashtags && <span>🏷️ {result.hashtags}</span>}
+                                      <span>@{result.author}</span>
+                                      {result.date > 0 && <span>{formatDate(result.date)}</span>}
+                    {result.hashtags && <span>{result.hashtags}</span>}
                 </ResultMeta>
               </SearchResultItem>
             ))}

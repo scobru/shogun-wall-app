@@ -1,14 +1,15 @@
 import { useEffect } from 'react'
+import { Outlet } from 'react-router-dom'
 
 const NodesLanding = () => {
     useEffect(() => {
-        document.title = 'List Nodes'
+        document.title = 'Nodes'
     }, [])
 
     return (
-        <>
-            <h3>Nodes Landing Page</h3>
-        </>
+        <div style={{ padding: '1rem' }}>
+            <Outlet />
+        </div>
     )
 }
 

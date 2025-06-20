@@ -18,6 +18,7 @@ import useKeyboard from '../utils/useKeyboard'
 import { createMarkup, linkify } from '../utils'
 import useViewCount from 'List/useViewCount'
 import ViewCount from 'List/ViewCount'
+import OGLinkPreview from '../components/OGLinkPreview'
 
 /**
  *
@@ -42,8 +43,10 @@ const ViewNode = () => {
 
    // init the page title
    useEffect(() => {
-      document.title = `View Brick '${key.substring(0, 50)}`
-   }, [])
+      document.title = node?.directionText 
+         ? `${node.directionText.substring(0, 50)}`
+         : `View Post ${key.substring(0, 10)}`
+   }, [node?.directionText, key])
 
    useEffect(() => {
       if (keypressed === 'h') {
@@ -122,24 +125,50 @@ const ViewNode = () => {
    }
 
    const goback = () => {
-      navigate(`/node/${node?.head}`)
+      if (node?.head) {
+         navigate(`/node/${node.head}`)
+      } else {
+         navigate('/all')
+      }
    }
 
    const dateFormatted = useMemo(() => {
       if (!node?.date) return ''
       const date = new Date(node.date)
-
-      return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+      return `${date.toLocaleDateString('it-IT')} ${date.toLocaleTimeString('it-IT', { 
+         hour: '2-digit', 
+         minute: '2-digit' 
+      })}`
    }, [node?.date])
+
+   const commentsCount = Object.keys(directions).length
 
    return (
       <ViewNodeStyled>
+         {/* Header con navigazione */}
          <BackSectionWrapper className="blockSection">
-            {node?.head && <BackButton onClick={goback}>{'< '}</BackButton>}
-            {!node?.head && <div>&nbsp;</div>}
+            <BackButton onClick={goback}>
+               ← {node?.head ? 'Torna al post padre' : 'Torna a tutti i post'}
+            </BackButton>
+            <ViewCount count={views} />
          </BackSectionWrapper>
 
+         {/* Contenuto principale del post */}
          <MessageWrapper className="messageWrapper">
+            {/* Titolo del post */}
+            {node?.directionText && (
+               <div style={{ 
+                  fontSize: '24px', 
+                  fontWeight: 'bold', 
+                  marginBottom: '16px',
+                  color: 'var(--text-color)',
+                  lineHeight: '1.3'
+               }}>
+                  {node.directionText}
+               </div>
+            )}
+
+            {/* Info autore e data */}
             <MessageTop className="messageTop">
                {node?.user && (
                   <Username className={node?.userType === 'shogun' ? 'shogun-user' : ''}>
@@ -147,60 +176,117 @@ const ViewNode = () => {
                      {node?.userType === 'shogun' && (
                         <span className="verified-badge">✓</span>
                      )}
+                     {node?.userType === 'guest' && (
+                        <span style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.7 }}>Guest</span>
+                     )}
                   </Username>
                )}
                {!node?.user && <LoadingWheel />}
-               {dateFormatted && (
-                  <MessageDate className="messageDate">
-                     {dateFormatted}
-                  </MessageDate>
-               )}
-               {!dateFormatted && <LoadingWheel />}
-               <ViewCount count={views} />
+               
+               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {dateFormatted && (
+                     <MessageDate className="messageDate">
+                        {dateFormatted}
+                     </MessageDate>
+                  )}
+                  {!dateFormatted && <LoadingWheel />}
+                  
+                  {/* Badge categoria */}
+                  {node?.category && (
+                     <div style={{
+                        padding: '2px 8px',
+                        backgroundColor: 'var(--primary-100)',
+                        color: 'var(--primary-700)',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                     }}>
+                        {node.category}
+                     </div>
+                  )}
+               </div>
             </MessageTop>
 
-            {/* OG Link - mostra solo se presente l'URL */}
-            {node?.url && (
+            {/* Hashtags */}
+            {node?.hashtags && (
                <div style={{ 
-                  marginBottom: '15px', 
-                  padding: '8px 12px', 
-                  backgroundColor: '#f8f9fa', 
-                  borderRadius: '6px', 
-                  border: '1px solid #e9ecef',
-                  fontSize: '14px',
-                  marginTop: '10px'
+                  marginBottom: '16px',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '6px'
                }}>
-                  <span style={{ fontWeight: 'bold', marginRight: '8px' }}>URL Esterno:</span>
-                  <a 
-                     href={node.url} 
-                     target="_blank" 
-                     rel="noopener noreferrer"
-                     style={{ color: '#0366d6', textDecoration: 'none' }}
-                  >
-                     {node.url}
-                  </a>
+                  {node.hashtags.split(/\s+/).filter(tag => tag.trim()).map((tag, index) => (
+                     <span 
+                        key={index}
+                        style={{
+                           padding: '2px 6px',
+                           backgroundColor: 'var(--gray-100)',
+                           color: 'var(--gray-700)',
+                           borderRadius: '8px',
+                           fontSize: '11px',
+                           fontWeight: '500'
+                        }}
+                     >
+                        {tag.startsWith('#') ? tag : `#${tag}`}
+                     </span>
+                  ))}
                </div>
             )}
 
+            {/* OG Link Preview - migliorato */}
+            {node?.url && (
+               <div style={{ marginBottom: '20px' }}>
+                  <OGLinkPreview url={node.url} compact={false} />
+               </div>
+            )}
+
+            {/* Contenuto del messaggio */}
             {node?.message && (
                <Message
                   className="message"
                   dangerouslySetInnerHTML={createMarkup(node?.message)}
+                  style={{
+                     fontSize: '16px',
+                     lineHeight: '1.6',
+                     marginTop: '16px'
+                  }}
                />
             )}
 
-            {!node?.message && <LoadingWheel />}
+            {!node?.message && !node?.directionText && <LoadingWheel />}
          </MessageWrapper>
 
-         {Object.keys(directions).map((key: string) => (
-            <NodeRow
-               key={key}
-               directionKey={key}
-               directions={directions}
-               pruneRight={pruneRight}
-            />
-         ))}
+         {/* Sezione commenti */}
+         <div style={{ marginTop: '32px' }}>
+            <div style={{
+               padding: '12px 16px',
+               backgroundColor: 'var(--gray-50)',
+               borderRadius: '8px',
+               marginBottom: '16px',
+               borderLeft: '4px solid var(--primary-500)'
+            }}>
+               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: 'var(--text-color)' }}>
+                  COMMENTI ({commentsCount})
+               </h3>
+               {commentsCount === 0 && (
+                  <p style={{ margin: '8px 0 0 0', color: 'var(--gray-600)', fontSize: '14px' }}>
+                     Sii il primo a commentare questo post
+                  </p>
+               )}
+            </div>
 
+            {/* Lista commenti */}
+            {Object.keys(directions).map((key: string) => (
+               <NodeRow
+                  key={key}
+                  directionKey={key}
+                  directions={directions}
+                  pruneRight={pruneRight}
+               />
+            ))}
+         </div>
+
+         {/* Form nuovo commento */}
          <NewNodeWrapper>
             <NewSubNode head={key} nodeAdded={nodeAdded} />
          </NewNodeWrapper>

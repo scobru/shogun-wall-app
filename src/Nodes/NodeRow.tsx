@@ -5,46 +5,117 @@ import { SimpleIcon, Styles } from '../Interface'
 import { ITEM_BORDER, Username } from './ViewNode.styled'
 import { GunId } from '.'
 import { useState, useEffect } from 'react'
+import OGLinkPreview from '../components/OGLinkPreview'
 
 export const LinkWrapper = styled.div`
-   padding: 0.5rem 2rem;
-   display: flex;
-   flex-direction: row;
-   align-items: stretch;
+   margin-bottom: 16px;
+   border-radius: 8px;
+   border: 1px solid var(--gray-200);
+   background-color: var(--card-color);
+   transition: all 0.2s ease;
+   
+   &:hover {
+      border-color: var(--gray-300);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   }
 `
 
 export const NodeLink = styled(Link)`
-   padding: 1rem 1rem;
-   margin: 0 1rem 0 0;
-   border: ${ITEM_BORDER};
-   border-radius: 8px;
-   flex-grow: 2;
-   color: black;
+   display: block;
+   padding: 16px;
+   color: var(--text-color);
    text-decoration: none;
    
    .comment-header {
       display: flex;
-      margin-bottom: 8px;
+      justify-content: space-between;
       align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--gray-100);
+   }
+   
+   .comment-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+   }
+   
+   .comment-date {
+      font-size: 12px;
+      color: var(--gray-500);
+      font-style: italic;
    }
    
    .comment-body {
-      line-height: 1.4;
+      line-height: 1.5;
+      font-size: 15px;
+      color: var(--text-color);
+      margin-bottom: 12px;
+      
+      p {
+         margin: 0 0 8px 0;
+         
+         &:last-child {
+            margin-bottom: 0;
+         }
+      }
    }
    
    .og-link-indicator {
-      display: inline-block;
-      margin-left: 10px;
-      font-size: 12px;
-      padding: 1px 6px;
-      background-color: #e8f0fe;
-      color: #1a73e8;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 6px;
+      background-color: var(--primary-50);
+      color: var(--primary-600);
       border-radius: 10px;
-      font-weight: bold;
+      font-weight: 500;
+   }
+   
+   .comment-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--gray-100);
+   }
+   
+   .view-full-link {
+      font-size: 12px;
+      color: var(--primary-600);
+      font-weight: 500;
+      
+      &:hover {
+         text-decoration: underline;
+      }
    }
    
    &:hover {
-      background-color: var(--widget-hover-color);
+      background-color: var(--gray-25);
+   }
+`
+
+const ActionButton = styled.button`
+   background: none;
+   border: none;
+   color: var(--gray-500);
+   font-size: 12px;
+   cursor: pointer;
+   padding: 4px 8px;
+   border-radius: 4px;
+   transition: all 0.2s ease;
+   
+   &:hover {
+      background-color: var(--gray-100);
+      color: var(--text-color);
+   }
+   
+   &.delete-btn:hover {
+      background-color: var(--error-50);
+      color: var(--error-600);
    }
 `
 
@@ -72,6 +143,30 @@ const NodeRow = ({ directionKey, directions, pruneRight }: NodeRowProps) => {
          })
    }, [directionKey])
    
+   const formatDate = (date: number | string) => {
+      if (!date) return ''
+      const d = new Date(date)
+      const now = new Date()
+      const diffInHours = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60))
+      
+      if (diffInHours < 1) return 'Ora'
+      if (diffInHours < 24) return `${diffInHours}h fa`
+      if (diffInHours < 48) return 'Ieri'
+      return d.toLocaleDateString('it-IT', { 
+         month: 'short', 
+         day: 'numeric',
+         hour: '2-digit',
+         minute: '2-digit'
+      })
+   }
+
+   const truncateMessage = (message: string, maxLength: number = 200) => {
+      if (!message) return ''
+      const cleanMessage = message.replace(/<[^>]*>/g, '').trim()
+      if (cleanMessage.length <= maxLength) return cleanMessage
+      return cleanMessage.substring(0, maxLength) + '...'
+   }
+   
    return (
       <LinkWrapper className="linkWrapper">
          <NodeLink
@@ -82,39 +177,119 @@ const NodeRow = ({ directionKey, directions, pruneRight }: NodeRowProps) => {
             {commentNode ? (
                <>
                   <div className="comment-header">
-                     <Username className={commentNode.userType === 'shogun' ? 'shogun-user' : ''}>
-                        @{commentNode.user || 'anon'}
-                        {commentNode.userType === 'shogun' && (
-                           <span className="verified-badge">✓</span>
+                     <div className="comment-meta">
+                        <Username className={commentNode.userType === 'shogun' ? 'shogun-user' : ''}>
+                           @{commentNode.user || 'anon'}
+                           {commentNode.userType === 'shogun' && (
+                              <span className="verified-badge">✓</span>
+                           )}
+                           {commentNode.userType === 'guest' && (
+                              <span style={{ marginLeft: '4px', fontSize: '10px', opacity: 0.7 }}>Guest</span>
+                           )}
+                        </Username>
+                        
+                        {commentNode.category && (
+                           <span style={{
+                              padding: '1px 6px',
+                              backgroundColor: 'var(--primary-100)',
+                              color: 'var(--primary-700)',
+                              borderRadius: '8px',
+                              fontSize: '10px',
+                              fontWeight: '500'
+                           }}>
+                              {commentNode.category}
+                           </span>
                         )}
-                     </Username>
-                     {commentNode.date && (
-                        <span style={{ fontSize: '13px', color: '#666', fontStyle: 'italic' }}>
-                           {new Date(commentNode.date).toLocaleDateString()}
-                        </span>
-                     )}
-                     {commentNode.url && (
-                        <span className="og-link-indicator">🔗 og-link</span>
-                     )}
+                     </div>
+                     
+                     <div className="comment-date">
+                        {formatDate(commentNode.date || commentNode.timestamp)}
+                        {commentNode.url && (
+                           <span className="og-link-indicator">
+                              Link
+                           </span>
+                        )}
+                     </div>
                   </div>
+                  
+                  {/* Titolo del commento se presente */}
+                  {commentNode.directionText && (
+                     <div style={{
+                        fontWeight: '600',
+                        fontSize: '16px',
+                        marginBottom: '8px',
+                        color: 'var(--text-color)'
+                     }}>
+                        {commentNode.directionText}
+                     </div>
+                  )}
+                  
+                  {/* Contenuto del commento */}
                   <div className="comment-body">
-                     {directions[directionKey] || `(missing message)`}
+                     {truncateMessage(directions[directionKey] || commentNode.message || '(messaggio vuoto)')}
+                  </div>
+                  
+                  {/* OG Link Preview per commenti con URL */}
+                  {commentNode.url && (
+                     <div style={{ marginTop: '12px', marginBottom: '8px' }}>
+                        <OGLinkPreview url={commentNode.url} compact={true} />
+                     </div>
+                  )}
+                  
+                  {/* Hashtags del commento */}
+                  {commentNode.hashtags && (
+                     <div style={{ 
+                        marginTop: '8px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px'
+                     }}>
+                        {commentNode.hashtags.split(/\s+/).filter(tag => tag.trim()).slice(0, 3).map((tag, index) => (
+                           <span 
+                              key={index}
+                              style={{
+                                 padding: '1px 4px',
+                                 backgroundColor: 'var(--gray-100)',
+                                 color: 'var(--gray-600)',
+                                 borderRadius: '6px',
+                                 fontSize: '9px',
+                                 fontWeight: '500'
+                              }}
+                           >
+                              {tag.startsWith('#') ? tag : `#${tag}`}
+                           </span>
+                        ))}
+                     </div>
+                  )}
+                  
+                  <div className="comment-actions">
+                     <span className="view-full-link">
+                        Visualizza commento completo →
+                     </span>
+                     
+                     <ActionButton 
+                        className="delete-btn"
+                        onClick={(e) => {
+                           e.preventDefault()
+                           e.stopPropagation()
+                           if (window.confirm('Rimuovere questo commento?')) {
+                              pruneRight(directionKey)
+                           }
+                        }}
+                        title="Rimuovi commento"
+                     >
+                        Rimuovi
+                     </ActionButton>
                   </div>
                </>
             ) : (
-               <>{directions[directionKey] || `(missing key)`}</>
+               <div style={{ padding: '20px', textAlign: 'center' }}>
+                  <div style={{ color: 'var(--gray-500)', fontSize: '14px' }}>
+                     Caricamento commento...
+                  </div>
+               </div>
             )}
          </NodeLink>
-
-         <SimpleIcon
-            content="[ d ]"
-            hoverContent={'[ prune ]'}
-            style={Styles.warning}
-            className="simpleIcon"
-            onClick={() => {
-               pruneRight(directionKey)
-            }}
-         />
       </LinkWrapper>
    )
 }

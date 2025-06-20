@@ -22,17 +22,30 @@ const ViewNodeStyled = styled.div`
    display: flex;
    flex-direction: column;
    border-radius: 10px;
-   box-shadow: -7px -7px 20px 0px var(--shadow-light1),
-      -4px -4px 5px 0px var(--shadow-light2),
-      7px 7px 20px 0px var(--shadow-dark1), 4px 4px 5px 0px var(--shadow-dark2),
-      inset 0px 0px 0px 0px var(--shadow-light1),
-      inset 0px 0px 0px 0px var(--shadow-dark2),
-      inset 0px 0px 0px 0px var(--shadow-light1),
-      inset 0px 0px 0px 0px var(--shadow-dark2);
    background-color: var(--card-color);
+   border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   transition: all 0.2s ease;
+   
+   &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      border-color: var(--primary-200, rgba(0, 120, 212, 0.3));
+   }
 
    img {
       width: 100%;
+   }
+   
+   /* Miglioramento contrasto per modalità light */
+   @media (prefers-color-scheme: light) {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      
+      &:hover {
+         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+         border-color: #d1d5db;
+      }
    }
 `
 const HeadLink = styled(Link)`
@@ -42,23 +55,40 @@ const HeadLink = styled(Link)`
    padding-bottom: 8px;
 `
 const Username = styled.div`
-   padding: 3px 8px;
-   background-color: var(--accent-color);
+   padding: 4px 8px;
+   background-color: var(--accent-color, #f3f4f6);
    border-radius: 12px;
    font-weight: 600;
    margin-right: 8px;
    font-size: 14px;
    display: flex;
    align-items: center;
+   color: var(--text-color, #374151);
+   border: 1px solid var(--border-color, #e5e7eb);
    
    &.shogun-user {
-      background-color: #28a745;
+      background-color: #22c55e;
       color: white;
+      border-color: #16a34a;
    }
    
    .verified-badge {
       margin-left: 4px;
       font-size: 11px;
+      color: #22c55e;
+   }
+   
+   /* Miglioramento contrasto per modalità light */
+   @media (prefers-color-scheme: light) {
+      background-color: #f9fafb;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      
+      &.shogun-user {
+         background-color: #22c55e;
+         color: white;
+         border-color: #16a34a;
+      }
    }
 `
 
@@ -206,7 +236,15 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
          <br />
          <Menu>
             {node.user && (
-               <Username className={node.userType === 'shogun' ? 'shogun-user' : ''}>
+               <Username 
+                  className={node.userType === 'shogun' ? 'shogun-user' : ''}
+                  onClick={(e) => {
+                     e.stopPropagation()
+                     navigate(`/profile/${encodeURIComponent(node.user)}`)
+                  }}
+                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                  title={`Vedi tutti i contenuti di ${node.user}`}
+               >
                   @{node.user}
                   {node.userType === 'shogun' && (
                      <span className="verified-badge">✓</span>

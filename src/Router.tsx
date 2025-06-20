@@ -6,9 +6,9 @@ import {
    Navigate,
    useNavigate
 } from 'react-router-dom'
-import { ViewNode, NewNode } from './Nodes'
+import { ViewNode, NewNode, NodesLanding } from './Nodes'
 import { GetAll } from './List'
-import { NewPost, ViewPost, ViewPostList, BlogWrapper } from './Blog'
+import { NewPost, ViewPost, ViewPostList, BlogWrapper, Profile, UserPosts, UserProfile } from './Blog'
 import ViewArchive from './Blog/ViewArchive'
 import EditPost from './Blog/EditPost'
 import Dashboard from './Nodes/Dashboard'
@@ -38,7 +38,12 @@ function NewNodeWithRedirect() {
 
 export default function Router() {
    return (
-      <BrowserRouter>
+      <BrowserRouter
+         future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+         }}
+      >
          <AuthProvider>
             <Routes>
                <Route path="*" element={<Wrapper />}>
@@ -59,12 +64,17 @@ export default function Router() {
                   <Route path="dashboard" element={<BlogWrapper />}>
                      <Route path=":key" element={<Dashboard />} />
                   </Route>
-                  <Route path="node" element={<BlogWrapper />}>
+                  <Route path="profile" element={<BlogWrapper />}>
+                     <Route path="" element={<Profile />} />
+                     <Route path=":username" element={<UserProfile />} />
+                  </Route>
+                  <Route path="node" element={<NodesLanding />}>
                      <Route
                         path="new"
                         element={<NewNodeWithRedirect />}
                      />
-                     <Route path=":key" element={<ViewNode />} />
+                     <Route path=":id" element={<ViewNode />} />
+                     <Route path="user/:username" element={<UserProfile />} />
                   </Route>
                   <Route path="*" element={<Navigate replace to="/all" />} />
                </Route>

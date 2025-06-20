@@ -194,7 +194,20 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
          <div style={{ flex: 1 }}>
             {/* Info utente */}
             <UserInfo>
-               <span className="user-name">
+               <span 
+                  className="user-name"
+                  onClick={(e) => {
+                     e.stopPropagation()
+                     if (node.user) {
+                        navigate(`/profile/${encodeURIComponent(node.user)}`)
+                     }
+                  }}
+                  style={{ 
+                     cursor: node.user ? 'pointer' : 'default',
+                     textDecoration: node.user ? 'underline' : 'none'
+                  }}
+                  title={node.user ? `Vedi tutti i contenuti di ${node.user}` : undefined}
+               >
                   {node.userPub 
                      ? `${node.userPub.substring(0, 12)}...`
                      : (node.user || 'Unknown')
@@ -235,14 +248,14 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
                      onClick={handleDeleteLink}
                      title="Rimuovi collegamento (il nodo rimane nel database)"
                   >
-                     🔗 Scollega
+                     Scollega
                   </button>
                   <button 
                      className="node-action-btn delete-full-btn"
                      onClick={handleDeleteNode}
                      title="CANCELLA COMPLETAMENTE il nodo dal database"
                   >
-                     🗑️ Elimina
+                     Elimina
                   </button>
                </NodeActions>
             )}

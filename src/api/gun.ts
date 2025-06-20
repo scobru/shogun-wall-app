@@ -1,4 +1,5 @@
 import GUN from 'gun'
+import 'gun/sea.js' // Importa SEA per funzionalità di signature e crittografia
 
 const peers = ['http://localhost:8765/gun']
 

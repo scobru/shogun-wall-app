@@ -2,21 +2,113 @@ import styled from 'styled-components'
 import { useRef, useState } from 'react'
 import { Button, Input } from '../Interface'
 import { useAuth } from '../utils/AuthContext'
+import { AuthButton } from '../components/AuthButton'
 
 const UsernameSessionStyled = styled.div`
    display: flex;
    align-items: center;
+   gap: var(--space-2);
+   white-space: nowrap;
+   
    .username {
-      padding: 8px 0px 5px 17px;
-      text-decoration: underline dotted;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-lg);
+      background: var(--background-secondary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      
+      &:hover {
+         background: var(--surface-hover);
+         border-color: var(--border-hover);
+      }
+      
+      &.authenticated {
+         cursor: default;
+         
+         &:hover {
+            background: var(--background-secondary);
+            border-color: var(--border);
+         }
+      }
    }
-   button {
-      height: 100%;
-      margin-left: 5px;
+   
+   .auth-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-family: var(--font-sans);
    }
+   
+   .loading-state {
+      padding: var(--space-2) var(--space-3);
+      color: var(--text-muted);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      font-style: italic;
+   }
+   
+   .shogun-badge {
+      font-size: 11px;
+      color: var(--success-500);
+      font-weight: 600;
+      background: color-mix(in srgb, var(--success-500) 10%, transparent);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-full);
+      border: 1px solid color-mix(in srgb, var(--success-500) 20%, transparent);
+   }
+   
+   .error-message {
+      color: var(--error-500);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      margin-top: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      background: color-mix(in srgb, var(--error-500) 10%, transparent);
+      border-radius: var(--radius-md);
+      border: 1px solid color-mix(in srgb, var(--error-500) 20%, transparent);
+   }
+   
+   .guest-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+   }
+   
+   .separator {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: var(--font-sans);
+   }
+   
+   .edit-form {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+   }
+   
    input {
-      padding-left: 10px;
+      min-width: 180px;
+      max-width: 220px;
+   }
+
+   .shogun-auth-container {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
    }
 `
 
@@ -54,56 +146,52 @@ export const UsernameSession = () => {
     */
    return (
       <UsernameSessionStyled>
-         {auth.loading ? (
-            <div style={{ padding: '8px 17px 5px 17px', color: '#666' }}>
-               Caricamento...
+         {/* Se l'utente è autenticato con Shogun, mostra ShogunButton */}
+         {auth.isLoggedIn ? (
+            <div className="shogun-auth-container">
+               <AuthButton />
             </div>
-         ) : auth.hasAnyAuth && !editMode ? (
-            <div className="username" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-               <span onClick={!auth.isAuthenticated ? toggleEdit : undefined} style={{ 
-                 cursor: !auth.isAuthenticated ? 'pointer' : 'default',
-                 textDecoration: !auth.isAuthenticated ? 'underline dotted' : 'none'
-               }}>
-                  {auth.currentUsername}
-                  {auth.isAuthenticated && (
-                     <span style={{ fontSize: '0.7em', color: '#4CAF50', marginLeft: '4px' }}>
-                        (Shogun ✓)
-                     </span>
-                  )}
-               </span>
-               {auth.isAuthenticated ? (
-                  <Button onClick={auth.logout} style={{ fontSize: '12px', padding: '2px 8px' }}>
-                     Logout
-                  </Button>
-               ) : (
-                  <Button onClick={auth.redirectToAuth} style={{ fontSize: '12px', padding: '2px 8px' }}>
-                     Auth
-                  </Button>
-               )}
-            </div>
-         ) : !auth.hasAnyAuth ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-               <Button onClick={auth.redirectToAuth}>
-                  Accedi con Shogun
-               </Button>
-               <span style={{ color: '#666', fontSize: '12px' }}>o</span>
-               <Button onClick={toggleEdit} style={{ fontSize: '12px' }}>
-                  Guest
-               </Button>
-            </div>
-         ) : editMode ? (
+         ) : (
+            /* Se non è autenticato con Shogun, mostra le opzioni guest + ShogunButton */
             <>
-               <input
-                  placeholder="username:password"
-                  ref={usernameRef}
-                  onKeyPress={handleUserKeyPress}
-               />
-               <Button onClick={onSave}>Save</Button>
+               {auth.localUsername && !editMode ? (
+                  <div className="username" onClick={toggleEdit}>
+                     <span>{auth.localUsername}</span>
+                     <span style={{ 
+                        fontSize: '11px', 
+                        color: 'var(--text-muted)',
+                        fontStyle: 'italic' 
+                     }}>
+                        (guest)
+                     </span>
+                  </div>
+               ) : editMode ? (
+                  <div className="edit-form">
+                     <input
+                        className="input input-bordered"
+                        placeholder="Guest username"
+                        ref={usernameRef}
+                        onKeyPress={handleUserKeyPress}
+                        defaultValue={auth.localUsername || ''}
+                     />
+                     <Button variant="primary" size="sm" onClick={onSave}>
+                        Save
+                     </Button>
+                  </div>
+               ) : (
+                  <div className="guest-actions">
+                     <AuthButton />
+                     <span className="separator">o</span>
+                     <Button variant="outline" size="sm" onClick={toggleEdit}>
+                        Guest
+                     </Button>
+                  </div>
+               )}
             </>
-         ) : null}
+         )}
          
          {auth.error && (
-            <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+            <div className="error-message">
                {auth.error}
             </div>
          )}

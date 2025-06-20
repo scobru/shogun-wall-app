@@ -1,17 +1,21 @@
-import styled from 'styled-components'
+import React from 'react'
 
-const Textarea = styled.textarea`
-   height: 7rem;
-   margin: 0 0 0 0rem;
-   flex: auto;
-   background-color: var(--input-bg);
-   color: var(--input-text);
-   border: 1px solid var(--input-border);
-   padding: 10px;
-   border-radius: 5px;
-   ::placeholder {
-      color: var(--input-placeholder);
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+   className?: string
+}
+
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+   ({ className = '', ...props }, ref) => {
+      const classes = [
+         'input', // Use same styling as input
+         'input-bordered',
+         className
+      ].filter(Boolean).join(' ')
+
+      return <textarea ref={ref} className={classes} {...props} />
    }
-`
+)
+
+Textarea.displayName = 'Textarea'
 
 export default Textarea

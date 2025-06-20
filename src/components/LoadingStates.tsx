@@ -7,34 +7,29 @@ const shimmer = keyframes`
 `;
 
 const SkeletonBase = styled.div`
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
   background-size: 400% 100%;
   animation: ${shimmer} 1.5s ease-in-out infinite;
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
 `;
 
 export const PostSkeleton = styled(SkeletonBase)`
   height: 120px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 `;
 
 export const NodeSkeleton = styled(SkeletonBase)`
   height: 80px;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 `;
 
 export const LoadingSpinner = styled.div`
   width: 24px;
   height: 24px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid var(--accent-color);
+  border: 3px solid var(--gray-200);
+  border-top: 3px solid var(--accent);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 `;
 
 export const LoadingState: React.FC<{ type: 'posts' | 'nodes'; count?: number }> = ({ 

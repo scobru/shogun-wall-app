@@ -11,134 +11,159 @@ import { Button } from 'Interface'
 import { DarkToggle } from './DarkToggle'
 
 const TopBarStyled = styled.div`
-   background: var(--win95-silver);
-   border: 2px solid;
-   border-color: var(--win95-light-gray) var(--win95-dark-gray) var(--win95-dark-gray) var(--win95-light-gray);
-   border-bottom: 1px solid var(--win95-dark-gray);
-
+   background: var(--surface);
+   border-bottom: 1px solid var(--border);
+   box-shadow: var(--shadow-sm);
+   position: relative;
+   z-index: 100;
+   
    display: flex;
    justify-content: flex-start;
    align-items: center;
-   padding: 4px 8px;
-   gap: 4px;
-   height: 32px;
+   padding: var(--space-3) var(--space-4);
+   gap: var(--space-3);
+   min-height: 64px;
+   overflow: hidden;
+   width: 100%;
    
    .beta {
       transform: rotate(180deg);
-      color: #f8633c;
-      font-weight: bold;
+      color: var(--error-500);
+      font-weight: 600;
       font-size: 10px;
       font-style: italic;
-      margin-left: 3px;
-      margin-bottom: 8px;
+      margin-left: var(--space-1);
+      margin-bottom: var(--space-2);
    }
    
    .nav {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--space-2);
+      flex: 1;
+      min-width: 0;
    }
    
    .nav-button {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 8px;
-      background: var(--win95-silver);
-      color: var(--win95-black);
-      border: 1px solid;
-      border-color: var(--win95-light-gray) var(--win95-dark-gray) var(--win95-dark-gray) var(--win95-light-gray);
-      border-radius: 0;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       text-decoration: none;
-      font-size: 11px;
-      font-weight: normal;
-      font-family: 'MS Sans Serif', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font-sans);
       cursor: pointer;
-      min-height: 20px;
+      transition: all 0.2s ease;
+      min-height: 40px;
       
       &:hover {
-         background: #d4d0c8;
+         background: var(--surface-hover);
+         border-color: var(--border-hover);
+         transform: translateY(-1px);
+         box-shadow: var(--shadow-sm);
       }
       
       &:active {
-         border-color: var(--win95-dark-gray) var(--win95-light-gray) var(--win95-light-gray) var(--win95-dark-gray);
-         padding: 5px 7px 3px 9px;
+         transform: translateY(0);
+         box-shadow: none;
       }
       
       &.primary {
-         background: var(--hal-red);
-         color: var(--win95-white);
-         border-color: var(--hal-red-light) var(--hal-red-dark) var(--hal-red-dark) var(--hal-red-light);
+         background: var(--accent);
+         color: white;
+         border-color: var(--accent);
          
          &:hover {
-            background: var(--hal-red-dark);
-         }
-         
-         &:active {
-            border-color: var(--hal-red-dark) var(--hal-red-light) var(--hal-red-light) var(--hal-red-dark);
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
          }
       }
    }
    
    .usernameSession {
       margin-left: auto;
+      margin-right: var(--space-3);
+      flex-shrink: 0;
       
       input {
-         height: 20px;
-         padding: 2px 4px;
-         border: 1px solid;
-         border-color: var(--win95-dark-gray) var(--win95-light-gray) var(--win95-light-gray) var(--win95-dark-gray);
-         border-radius: 0;
-         background: var(--win95-white);
-         color: var(--win95-black);
-         font-size: 11px;
-         font-family: 'MS Sans Serif', sans-serif;
+         height: 40px;
+         padding: var(--space-2) var(--space-3);
+         border: 1px solid var(--border);
+         border-radius: var(--radius-md);
+         background: var(--surface);
+         color: var(--text-primary);
+         font-size: 14px;
+         font-family: var(--font-sans);
+         transition: all 0.2s ease;
          
          &:focus {
-            outline: 1px dotted var(--win95-black);
-            outline-offset: -2px;
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+         }
+         
+         &::placeholder {
+            color: var(--text-muted);
          }
       }
    }
-   .logo {
+   .hal-logo {
       display: flex;
       align-items: center;
       text-decoration: none;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      z-index: 1;
+      
+      &:hover {
+         transform: scale(1.02);
+      }
+      
       .halText {
-         margin-top: 0;
-         margin-left: 6px;
-         color: var(--hal-red);
-         font-family: 'MS Sans Serif', sans-serif;
-         font-weight: bold;
-         font-size: 14px;
-         text-shadow: 1px 1px 0 var(--win95-light-gray);
-         letter-spacing: 1px;
+         margin: 0;
+         padding: 0;
+         color: var(--accent);
+         font-family: var(--font-sans);
+         font-weight: 700;
+         font-size: 18px;
+         letter-spacing: 0.5px;
+         white-space: nowrap;
+         line-height: 1;
          
          &::before {
-            content: "●";
-            color: var(--hal-red);
-            margin-right: 4px;
+            content: "";
+            color: var(--accent);
+            margin-right: var(--space-2);
             animation: halBlink 2s ease-in-out infinite;
+            text-shadow: 0 0 8px currentColor;
+            display: inline-block;
          }
          
          @keyframes halBlink {
             0%, 80% { 
                opacity: 1;
-               text-shadow: 0 0 4px var(--hal-red);
+               text-shadow: 0 0 8px currentColor;
             }
             90% { 
-               opacity: 0.3;
+               opacity: 0.4;
             }
             100% { 
                opacity: 1;
-               text-shadow: 0 0 6px var(--hal-red);
+               text-shadow: 0 0 12px currentColor;
             }
          }
       }
    }
+   
    .darkToggle {
-      margin-top: 3px;
-      margin-left: auto;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
    }
 `
 
@@ -149,7 +174,7 @@ const TopBar = () => {
    }, [])
    return (
       <TopBarStyled>
-         <Link to="/all" className="logo">
+         <Link to="/all" className="hal-logo">
             <div className="halText">HAL 9000</div>
          </Link>
          
@@ -157,31 +182,40 @@ const TopBar = () => {
             <Link to="/node/new" className="nav-button primary">
                <div>New</div>
                <img src={RandomLogo} alt="HAL Interface" style={{ 
-                  height: '16px', 
+                  height: '18px', 
                   filter: 'brightness(0) invert(1)' 
                }} />
             </Link>
             
             <Link to="/blog" className="nav-button">
-               📝 Blog
+               Blog
             </Link>
             
             <Link to="/archive" className="nav-button">
-               🗄️ Archive
-         </Link>
+               Archive
+            </Link>
             
-            {clock && (
+            <Link to="/profile" className="nav-button">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '0.5rem' }}>
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                     </svg>
+                     Profile
+            </Link>
+            
+            {/* {clock && (
                <Link to="/dashboard/clock" className="nav-button">
                   🕐 {clock.directionText}
                </Link>
-            )}
+            )} */}
          </div>
          
          <div className="usernameSession">
             <UsernameSession />
          </div>
          
+         <div className="darkToggle">
             <DarkToggle />
+         </div>
       </TopBarStyled>
    )
 }

@@ -1,18 +1,21 @@
 import { DungeonNode } from 'Nodes'
-import { useEffect } from 'react'
+import { useEffect, memo } from 'react'
 import useListenAll from '../api/useListenAll'
 import { createMarkup } from '../utils'
-import { Helmet } from 'react-helmet'
-import styled from 'styled-components'
 
-const ViewArchive = () => {
+const ViewArchive = memo(() => {
    const posts = useListenAll('archive') as DungeonNode[]
 
    useEffect(() => {
       document.title = 'Archive'
    }, [])
 
-   console.log('🗄️ ViewArchive Debug:', { posts, postsLength: posts?.length })
+   // Debug logging ridotto e condizionale
+   useEffect(() => {
+      if (process.env.NODE_ENV === 'development' && posts?.length !== undefined) {
+         console.log('🗄️ ViewArchive Debug:', { postsLength: posts.length })
+      }
+   }, [posts?.length])
 
    if (!posts) return <div>Caricamento archivio...</div>
    
@@ -29,9 +32,9 @@ const ViewArchive = () => {
    return (
       <div>
          <div className="mb-5 p-3 bg-base-100 rounded-lg border border-base-300">
-            <strong className="text-base-content">🗄️ Archivio ({posts.length})</strong>
+            <strong className="text-base-content">Archivio ({posts.length})</strong>
             <div className="text-xs text-base-content/70 mt-1">
-               📚 Post archiviati e contenuti storici
+                                Post archiviati e contenuti storici
             </div>
          </div>
 
@@ -44,6 +47,8 @@ const ViewArchive = () => {
          ))}
       </div>
    )
-}
+})
+
+ViewArchive.displayName = 'ViewArchive'
 
 export default ViewArchive

@@ -196,7 +196,7 @@ const NodeFilter: React.FC<NodeFilterProps> = ({ nodes, onFilteredNodes }) => {
    return (
       <FilterStyled>
          <div className="filter-section">
-            <div className="filter-label">🔍 Cerca nei nodi</div>
+            <div className="filter-label">Cerca nei nodi</div>
             <input
                type="text"
                className="search-input"
@@ -208,7 +208,7 @@ const NodeFilter: React.FC<NodeFilterProps> = ({ nodes, onFilteredNodes }) => {
          
          {allCategories.length > 0 && (
             <div className="filter-section">
-               <div className="filter-label">📂 Categorie ({allCategories.length})</div>
+               <div className="filter-label">Categorie ({allCategories.length})</div>
                <div className="tags-container">
                   {allCategories.map(category => (
                      <span
@@ -242,7 +242,7 @@ const NodeFilter: React.FC<NodeFilterProps> = ({ nodes, onFilteredNodes }) => {
          
          {hasActiveFilters && (
             <button className="clear-filters" onClick={clearAllFilters}>
-               ✕ Pulisci filtri
+               Pulisci filtri
             </button>
          )}
          

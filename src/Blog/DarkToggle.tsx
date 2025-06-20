@@ -2,87 +2,52 @@ import styled from 'styled-components'
 import { useEffect, useState } from 'react'
 
 export const DarkToggle = () => {
-   // State to hold the checked status of the toggle
-   const [isDarkMode, setIsDarkMode] = useState(() => {
+   // State to hold the current theme
+   const [theme, setTheme] = useState(() => {
       // Get the stored preference from localStorage
-      const savedTheme = localStorage.getItem('theme')
-      const isDarkMode = savedTheme === 'dark'
-      const root = document.documentElement
-      root.setAttribute('data-theme', isDarkMode ? 'dark' : 'light')
-      return isDarkMode
-   })
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      const root = document.documentElement;
+      root.setAttribute('data-theme', savedTheme);
+      return savedTheme;
+   });
 
    useEffect(() => {
       // Apply the theme on initial load
-      const root = document.documentElement
-      root.setAttribute('data-theme', isDarkMode ? 'dark' : 'light')
-   }, [isDarkMode])
+      const root = document.documentElement;
+      root.setAttribute('data-theme', theme);
+   }, [theme]);
 
-   const toggleTheme = (event) => {
-      const isChecked = event.target.checked
-      setIsDarkMode(isChecked)
+   const toggleTheme = () => {
+      const themes = ['light', 'dark'];
+      const currentThemeIndex = themes.indexOf(theme);
+      const nextThemeIndex = (currentThemeIndex + 1) % themes.length;
+      const nextTheme = themes[nextThemeIndex];
+      
+      setTheme(nextTheme);
 
       // Store the preference in localStorage
-      localStorage.setItem('theme', isChecked ? 'dark' : 'light')
-   }
+      localStorage.setItem('theme', nextTheme);
+   };
 
    return (
       <Dte>
-         <label className="switch">
-            <input
-               type="checkbox"
-               checked={isDarkMode}
-               onChange={toggleTheme}
-            />
-            <span className="slider"></span>
-         </label>
+         <button onClick={toggleTheme} className="theme-toggle-button">
+            {theme.charAt(0).toUpperCase() + theme.slice(1)}
+         </button>
       </Dte>
-   )
-}
+   );
+};
 
 const Dte = styled.div`
-   .switch {
-      position: relative;
-      display: inline-block;
-      width: var(--slider-width);
-      height: var(--slider-height);
-      margin-right: 5px;
-   }
-
-   /* The slider */
-   .slider {
-      position: absolute;
+   .theme-toggle-button {
+      background: var(--win95-silver);
+      color: var(--win95-black);
+      border: 2px solid;
+      border-color: var(--win95-light-gray) var(--win95-dark-gray) var(--win95-dark-gray) var(--win95-light-gray);
+      padding: 4px 8px;
+      font-family: 'MS Sans Serif', 'Microsoft Sans Serif', sans-serif;
+      font-size: 11px;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--slider-background);
-      transition: 0.4s;
-      border-radius: var(--slider-border-radius);
-   }
-
-   .slider:before {
-      position: absolute;
-      content: '';
-      height: var(--slider-knob-size);
-      width: var(--slider-knob-size);
-      left: var(--slider-knob-offset);
-      bottom: var(--slider-knob-offset);
-      background-color: white;
-      transition: 0.4s;
-      border-radius: var(--slider-knob-border-radius);
-   }
-
-   input {
-      appearance: none;
-   }
-
-   input:checked + .slider {
-      background-color: var(--slider-checked-background);
-   }
-
-   input:checked + .slider:before {
-      transform: translateX(var(--slider-knob-translateX));
+      min-height: 23px;
    }
 `

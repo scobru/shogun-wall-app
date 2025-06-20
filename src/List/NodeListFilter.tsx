@@ -309,7 +309,7 @@ const NodeListFilter: React.FC<NodeListFilterProps> = ({ nodes, onFilteredNodesC
          <SearchSection $expanded={expanded}>
             <SearchInput
                type="text"
-               placeholder="🔍 Cerca nei nodi..."
+               placeholder="Cerca nei nodi..."
                value={filters.searchText}
                onChange={handleSearchChange}
             />
@@ -371,7 +371,7 @@ const NodeListFilter: React.FC<NodeListFilterProps> = ({ nodes, onFilteredNodesC
 
             {/* Users */}
             <FilterSection>
-               <FilterLabel>👤 Utenti ({users.length})</FilterLabel>
+               <FilterLabel>Utenti ({users.length})</FilterLabel>
                {users.length > 0 ? (
                   <FilterTags>
                      {users.map(user => (

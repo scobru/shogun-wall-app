@@ -25,34 +25,33 @@ export const Button: React.FC<ButtonProps> = ({
   const variantClasses = {
     primary: 'btn-primary',
     secondary: 'btn-secondary',
-    accent: 'btn-accent',
-    ghost: 'btn-ghost',
+    accent: 'btn-primary',
+    ghost: 'btn-outline',
     outline: 'btn-outline',
     error: 'btn-error',
     warning: 'btn-warning',
-    info: 'btn-info',
-    success: 'btn-success',
+    info: 'btn-primary',
+    success: 'btn-primary',
   }
   
   const sizeClasses = {
-    xs: 'btn-xs',
+    xs: 'btn-sm',
     sm: 'btn-sm',
     md: '',
     lg: 'btn-lg',
   }
   
   const shapeClasses = {
-    circle: 'btn-circle',
-    square: 'btn-square',
+    circle: '',
+    square: '',
   }
   
   const classes = [
     baseClasses,
     variantClasses[variant],
     sizeClasses[size],
-    shape ? shapeClasses[shape] : '',
-    block ? 'btn-block' : '',
-    loading ? 'loading' : '',
+    block ? 'w-full' : '',
+    loading ? 'opacity-50 cursor-not-allowed' : '',
     className
   ].filter(Boolean).join(' ')
   
@@ -63,9 +62,21 @@ export const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {loading ? (
-        <span className="loading loading-spinner loading-xs mr-2"></span>
-      ) : null}
-      {children}
+        <>
+          <div className="loading-spinner" style={{
+            width: '16px',
+            height: '16px',
+            border: '2px solid transparent',
+            borderTop: '2px solid currentColor',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            marginRight: 'var(--space-2)'
+          }}></div>
+          {children}
+        </>
+      ) : (
+        children
+      )}
     </button>
   )
 }

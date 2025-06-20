@@ -164,7 +164,34 @@ const NewPost = () => {
             <Button
                variant="primary"
                disabled={loading || Object.keys(errors).length > 0}
-               onClick={handleSubmit(saveNode)}
+               onClick={handleSubmit((data) => {
+                  // Clean the data before sending to avoid Gun.js errors
+                  const cleanedData = {
+                     ...data,
+                     title: data.title || '',
+                     content: data.content || '',
+                     key: data.key || '',
+                     description: data.description || '',
+                     url: data.url || undefined,
+                     image: data.image || undefined,
+                     category: data.category || undefined,
+                     hashtags: data.hashtags || undefined
+                  }
+                  
+                  // Remove undefined/empty fields
+                  Object.keys(cleanedData).forEach(key => {
+                     if (cleanedData[key] === undefined || cleanedData[key] === null || cleanedData[key] === '') {
+                        if (['title', 'content', 'key', 'description'].includes(key)) {
+                           // Required fields should have default values, not be deleted
+                           return
+                        }
+                        delete cleanedData[key]
+                     }
+                  })
+                  
+                  console.log('🏗️ Cleaned data before submission:', cleanedData)
+                  saveNode(cleanedData)
+               })}
                loading={loading}
                className="flex-1"
             >

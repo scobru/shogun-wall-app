@@ -95,4 +95,40 @@ export const formatPublicKey = (publicKey: string | null): string => {
   if (publicKey.length <= 12) return publicKey
   
   return `${publicKey.substring(0, 6)}...${publicKey.substring(publicKey.length - 6)}`
+}
+
+/**
+ * Determines if a string looks like a Gun.js public key
+ * @param userString The string to check
+ * @returns true if it looks like a public key
+ */
+export const isPublicKey = (userString: string): boolean => {
+  if (!userString || typeof userString !== 'string') return false
+  
+  // Gun.js public keys are:
+  // - Very long (>50 characters)  
+  // - Contain a dot (base64 format)
+  // - Don't contain underscores (usernames do)
+  // - Only contain base64 characters
+  return (
+    userString.length > 50 &&
+    userString.includes('.') &&
+    !userString.includes('_') &&
+    /^[A-Za-z0-9+/=.-]+$/.test(userString)
+  )
+}
+
+/**
+ * Formats an author display name, handling both usernames and public keys
+ * @param user The user identifier (username or public key)
+ * @returns Formatted display name
+ */
+export const formatAuthorDisplay = (user: string | null | undefined): string => {
+  if (!user) return 'Autore sconosciuto'
+  
+  if (isPublicKey(user)) {
+    return formatPublicKey(user)
+  }
+  
+  return user
 } 

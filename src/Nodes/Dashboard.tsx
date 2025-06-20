@@ -17,13 +17,14 @@ import useListen from '../api/useListen'
 import debounce from 'lodash.debounce'
 import Time from './Time'
 import styled from 'styled-components'
+import { useAuth } from '../utils/AuthContext'
 
 const DashboardView = ({ id }) => {
    const [directions, setDirections] = useState<DungeonNode[]>([])
    const [showHidden, setShowHidden] = useState<Boolean>(false)
-   const [message, setMessage] = useState(' ')
    const keypressed = useKeyboard(['h'])
    const node = useListen(id, 'node', true) as DungeonNode
+   const auth = useAuth()
 
    useEffect(() => {
       if (keypressed === 'h') {
@@ -48,7 +49,6 @@ const DashboardView = ({ id }) => {
 
    useEffect(() => {
       setDirections([])
-      setMessage(' ')
       const directionListeners: any[] = []
       const d = gun
          .get(namespace + '/node')
@@ -130,6 +130,21 @@ const DashboardView = ({ id }) => {
                 </pre> */}
             <Time style={{ padding: '10px 30px 0 30px', maxWidth: '500px' }} />
          </div>
+         
+         {/* Auth Status Indicator */}
+         {auth.isLoggedIn && (
+            <AuthStatusIndicator>
+               🔐 Shogun Authentication Active
+               {auth.username && (
+                  <div style={{ fontSize: '0.8em', marginTop: '4px' }}>
+                     👤 User: {auth.username}
+                     <br />
+                     📝 Full Gun.js operations enabled
+                  </div>
+               )}
+            </AuthStatusIndicator>
+         )}
+         
          <MessageWrapper className="messageWrapper">
             {node?.head && (
                <Link to={`/dashboard/${node.head}`}>d/{node.head}</Link>
@@ -183,6 +198,17 @@ const DashboardView = ({ id }) => {
       </>
    )
 }
+
+const AuthStatusIndicator = styled.div`
+   background: linear-gradient(135deg, #28a745, #20c997);
+   color: white;
+   padding: 12px 16px;
+   border-radius: 8px;
+   margin: 10px 0;
+   font-size: 0.9em;
+   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+   border-left: 4px solid #155724;
+`
 
 const DashboardStyled = styled.div`
    max-width: 1000px;

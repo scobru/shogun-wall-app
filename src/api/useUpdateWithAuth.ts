@@ -17,16 +17,28 @@ const useUpdateWithAuth = (model: string = 'node') => {
          throw new Error('Key is required')
       }
       
+      // Remove undefined properties to prevent Gun.js errors
+      const cleanData = Object.keys(data).reduce((acc, key) => {
+         if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+            acc[key] = data[key]
+         }
+         return acc
+      }, {})
+      
       // Aggiungi automaticamente l'autore del post
-      const enrichedData = {
-         ...data,
+      const enrichedData: any = {
+         ...cleanData,
          user: auth.isAuthenticated 
             ? (auth.userPub || auth.currentUsername || 'shogun_user')
             : (auth.currentUsername || 'anonymous'),
          userType: auth.isAuthenticated ? 'shogun' : 'guest',
-         userPub: auth.isAuthenticated ? auth.userPub : undefined,
-         userId: auth.isAuthenticated ? auth.userPub : undefined, // Usa pub come ID
          timestamp: Date.now()
+      }
+      
+      // Add optional fields only if they exist and are valid
+      if (auth.isAuthenticated && auth.userPub) {
+         enrichedData.userPub = auth.userPub
+         enrichedData.userId = auth.userPub
       }
       
       setLoading(true)
