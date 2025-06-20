@@ -1,5 +1,4 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { ShogunButtonProvider, useShogun } from 'shogun-button-react';
 import { ShogunCore } from 'shogun-core';
 import useLocalStorage from './useLocalStorage';
 import gun from '../api/gun';
@@ -147,38 +146,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   return (
-    <ShogunButtonProvider
-      sdk={shogun}
-      options={{
-        appName: "Wallie.io",
-        showOauth: true,
-        showWebauthn: true,
-        showMetamask: true,
-        showNostr: true,
-      }}
-      onLoginSuccess={(data) => {
-        console.log('✅ Login Shogun success in Wallie.io:', data);
-        setError(null);
-      }}
-      onSignupSuccess={(data) => {
-        console.log('✅ Signup Shogun success in Wallie.io:', data);
-        setError(null);
-      }}
-      onError={(error: unknown) => {
-        console.error('❌ Errore Shogun in Wallie.io:', error);
-        setError(error instanceof Error ? error.message : String(error));
-      }}
+    <AuthProviderInner 
+      shogun={shogun}
+      localUsername={localUsername}
+      setLocalUsername={setLocalUsername}
+      globalError={error}
+      setGlobalError={setError}
     >
-      <AuthProviderInner 
-        shogun={shogun}
-        localUsername={localUsername}
-        setLocalUsername={setLocalUsername}
-        globalError={error}
-        setGlobalError={setError}
-      >
-        {children}
-      </AuthProviderInner>
-    </ShogunButtonProvider>
+      {children}
+    </AuthProviderInner>
   );
 };
 
@@ -199,8 +175,43 @@ const AuthProviderInner: React.FC<AuthProviderInnerProps> = ({
   globalError,
   setGlobalError
 }) => {
-  // Usa il hook di ShogunButton per lo stato di autenticazione
-  const { isLoggedIn, userPub, username } = useShogun();
+  // Stato di autenticazione gestito direttamente con ShogunCore
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userPub, setUserPub] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+
+  // Effetto per monitorare lo stato di autenticazione
+  useEffect(() => {
+    if (shogun) {
+      const checkAuthStatus = () => {
+        const logged = shogun.isLoggedIn();
+        setIsLoggedIn(logged);
+        
+        if (logged) {
+          // Cerca di ottenere informazioni utente dall'API RxJS
+          const savedUserPub = shogun.rx.getUserPub();
+          setUserPub(savedUserPub || null);
+          
+          // Per ora non abbiamo un modo diretto per ottenere username
+          // Lo gestiremo negli eventi di login
+          if (!username && savedUserPub) {
+            setUsername(savedUserPub.slice(0, 8) + '...');
+          }
+        } else {
+          setUserPub(null);
+          setUsername(null);
+        }
+      };
+
+      // Controllo iniziale
+      checkAuthStatus();
+
+      // Aggiungi listener per cambiamenti di stato (se disponibile)
+      const interval = setInterval(checkAuthStatus, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [shogun]);
 
   const currentUsername = username || localUsername;
   const hasAnyAuth = isLoggedIn || !!localUsername;

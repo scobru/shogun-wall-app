@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Google+Sans+Mono:wght@400;500&display=swap');
-@import "shogun-button-react/styles.css";
-
-:root {
+/* @import "shogun-button-react/styles.css";
+ */:root {
    /* Google Gemini inspired color palette */
    --primary-50: #f0f9ff;
    --primary-100: #e0f2fe;
