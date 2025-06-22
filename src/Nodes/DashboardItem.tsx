@@ -183,6 +183,12 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
       createNode({ key: id, upVotes })
    }
 
+   const downVote = (node) => {
+      const downVotes = node?.downVotes ? node?.downVotes + 1 : 1
+      onUpdate({ ...node, downVotes }, id)
+      createNode({ key: id, downVotes })
+   }
+
    // Verifica se l'utente può modificare/cancellare il nodo
    const canEditNode = (node: DungeonNode) => {
       if (!node) return false
@@ -283,16 +289,42 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
             )}
          </div>
          <Tools>
-            {node?.upVotes}
-            <SimpleIcon
-               content="[ ⇧ ]"
-               hoverContent={'[ ⇧ ]'}
-               style={Styles.positive}
-               className="simpleIcon"
-               onClick={() => {
-                  upVote(node)
-               }}
-            />
+            {/* Voting section */}
+            <div style={{ 
+               display: 'flex', 
+               flexDirection: 'column', 
+               alignItems: 'center',
+               gap: '2px',
+               marginRight: '8px'
+            }}>
+               <SimpleIcon
+                  content="[ ⇧ ]"
+                  hoverContent={'[ ⇧ ] Upvote'}
+                  style={Styles.positive}
+                  className="simpleIcon"
+                  onClick={() => {
+                     upVote(node)
+                  }}
+               />
+               <span style={{ 
+                  fontSize: '11px', 
+                  fontWeight: 'bold',
+                  color: (node?.upVotes || 0) > (node?.downVotes || 0) ? '#28a745' : 
+                         (node?.downVotes || 0) > (node?.upVotes || 0) ? '#dc3545' : '#666'
+               }}>
+                  {(node?.upVotes || 0) - (node?.downVotes || 0)}
+               </span>
+               <SimpleIcon
+                  content="[ ⇩ ]"
+                  hoverContent={'[ ⇩ ] Downvote'}
+                  style={Styles.warning}
+                  className="simpleIcon"
+                  onClick={() => {
+                     downVote(node)
+                  }}
+               />
+            </div>
+            
             {/* Manteniamo l'icona originale per compatibilità */}
             <SimpleIcon
                content="[ ␡ ]"

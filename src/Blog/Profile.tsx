@@ -12,6 +12,14 @@ const Profile = () => {
    const [saving, setSaving] = useState(false)
    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
    
+   // Export/Import states
+   const [exportPassword, setExportPassword] = useState('')
+   const [importPassword, setImportPassword] = useState('')
+   const [importPairData, setImportPairData] = useState('')
+   const [exportedPair, setExportedPair] = useState('')
+   const [pairLoading, setPairLoading] = useState(false)
+   const [pairMessage, setPairMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
    const {
       register,
       handleSubmit,
@@ -101,6 +109,108 @@ const Profile = () => {
          })
       } finally {
          setSaving(false)
+      }
+   }
+
+   // Export Gun pair functionality
+   const handleExportPair = async () => {
+      if (!auth.isAuthenticated || !auth.userPub) {
+         setPairMessage({ type: 'error', text: 'Devi essere autenticato per esportare il pair' })
+         return
+      }
+
+      setPairLoading(true)
+      setPairMessage(null)
+
+      try {
+         const user = gun.user()
+         const pair = (user as any)?._?.sea
+         
+         if (!pair) {
+            throw new Error('Nessun pair Gun disponibile per l\'utente corrente')
+         }
+
+         let pairData = JSON.stringify(pair)
+
+         // Se è fornita una password, cripta il pair
+         if (exportPassword && exportPassword.trim()) {
+            if ((window as any).SEA && (window as any).SEA.encrypt) {
+               pairData = await (window as any).SEA.encrypt(pairData, exportPassword)
+            } else {
+               console.warn('Crittografia SEA non disponibile, esportazione non crittografata')
+            }
+         }
+
+         setExportedPair(pairData)
+         
+         // Copia negli appunti
+         if (navigator.clipboard) {
+            await navigator.clipboard.writeText(pairData)
+            setPairMessage({ type: 'success', text: 'Pair esportato e copiato negli appunti!' })
+         } else {
+            setPairMessage({ type: 'success', text: 'Pair esportato! Copialo manualmente dall\'area di testo.' })
+         }
+      } catch (error: any) {
+         setPairMessage({ type: 'error', text: `Errore nell'esportazione: ${error.message}` })
+      } finally {
+         setPairLoading(false)
+      }
+   }
+
+   // Import Gun pair functionality
+   const handleImportPair = async () => {
+      if (!importPairData.trim()) {
+         setPairMessage({ type: 'error', text: 'Inserisci i dati del pair' })
+         return
+      }
+
+      setPairLoading(true)
+      setPairMessage(null)
+
+      try {
+         let dataString = importPairData
+
+         // Se è fornita una password, decripta il pair
+         if (importPassword && importPassword.trim()) {
+            if ((window as any).SEA && (window as any).SEA.decrypt) {
+               dataString = await (window as any).SEA.decrypt(importPairData, importPassword)
+               if (!dataString) {
+                  throw new Error('Errore nella decrittazione - password sbagliata?')
+               }
+            } else {
+               console.warn('Decrittografia SEA non disponibile, assumendo dati non crittografati')
+            }
+         }
+
+         const pair = JSON.parse(dataString)
+         
+         // Valida la struttura del pair
+         if (!pair.pub || !pair.priv || !pair.epub || !pair.epriv) {
+            throw new Error('Struttura del pair non valida - chiavi richieste mancanti')
+         }
+
+         // Autentica con il pair importato
+         await new Promise<void>((resolve, reject) => {
+            gun.user().auth(pair, (ack: any) => {
+               if (ack.err) {
+                  reject(new Error(ack.err))
+               } else {
+                  resolve()
+               }
+            })
+         })
+
+         setPairMessage({ type: 'success', text: 'Pair importato con successo! Sei ora autenticato.' })
+         
+         // Ricarica la pagina per aggiornare lo stato di autenticazione
+         setTimeout(() => {
+            window.location.reload()
+         }, 2000)
+
+      } catch (error: any) {
+         setPairMessage({ type: 'error', text: `Errore nell'importazione: ${error.message}` })
+      } finally {
+         setPairLoading(false)
       }
    }
 
@@ -241,6 +351,139 @@ const Profile = () => {
                   </Button>
                </div>
             </form>
+
+            {/* Export/Import Gun Pair Section */}
+            {auth.isAuthenticated && (
+               <>
+                  <div className="divider my-6"></div>
+                  <div className="card bg-base-100 shadow-sm border border-base-300">
+                     <div className="card-body">
+                        <h2 className="text-lg font-semibold mb-4">🔑 Gestione Pair Gun</h2>
+                        
+                        {pairMessage && (
+                           <div className={`alert ${pairMessage.type === 'success' ? 'alert-success' : 'alert-error'} mb-4`}>
+                              {pairMessage.text}
+                           </div>
+                        )}
+
+                        <div className="tabs tabs-boxed mb-4">
+                           <button 
+                              className="tab tab-active"
+                              onClick={() => {
+                                 setExportedPair('')
+                                 setExportPassword('')
+                                 setPairMessage(null)
+                              }}
+                           >
+                              📤 Export
+                           </button>
+                           <button 
+                              className="tab"
+                              onClick={() => {
+                                 setImportPairData('')
+                                 setImportPassword('')
+                                 setPairMessage(null)
+                              }}
+                           >
+                              📥 Import
+                           </button>
+                        </div>
+
+                        {/* Export Section */}
+                        <div className="export-section mb-6">
+                           <h3 className="font-medium mb-3">Esporta il tuo Pair Gun</h3>
+                           <p className="text-sm text-base-content/70 mb-4">
+                              Esporta il tuo pair Gun per fare il backup del tuo account. Potrai usarlo per accedere da un altro dispositivo.
+                           </p>
+                           
+                           <div className="form-control mb-4">
+                              <label className="label">
+                                 <span className="label-text">Password di crittografia (opzionale ma consigliata)</span>
+                              </label>
+                              <input 
+                                 type="password"
+                                 className="input input-bordered"
+                                 value={exportPassword}
+                                 onChange={(e) => setExportPassword(e.target.value)}
+                                 placeholder="Lascia vuoto per esportare non crittografato"
+                                 disabled={pairLoading}
+                              />
+                           </div>
+
+                           {exportedPair && (
+                              <div className="form-control mb-4">
+                                 <label className="label">
+                                    <span className="label-text">Il tuo Pair Gun (copialo in un posto sicuro):</span>
+                                 </label>
+                                 <textarea 
+                                    className="textarea textarea-bordered font-mono text-xs"
+                                    value={exportedPair}
+                                    readOnly
+                                    rows={6}
+                                 />
+                              </div>
+                           )}
+
+                           <Button
+                              onClick={handleExportPair}
+                              disabled={pairLoading}
+                              loading={pairLoading}
+                              variant="primary"
+                           >
+                              {pairLoading ? 'Esportando...' : 'Esporta Pair'}
+                           </Button>
+                        </div>
+
+                        <div className="divider">OPPURE</div>
+
+                        {/* Import Section */}
+                        <div className="import-section">
+                           <h3 className="font-medium mb-3">Importa un Pair Gun</h3>
+                           <p className="text-sm text-base-content/70 mb-4">
+                              Importa un pair Gun per accedere con il tuo account esistente da un altro dispositivo.
+                           </p>
+                           
+                           <div className="form-control mb-4">
+                              <label className="label">
+                                 <span className="label-text">Dati del Pair Gun</span>
+                              </label>
+                              <textarea 
+                                 className="textarea textarea-bordered font-mono text-xs"
+                                 value={importPairData}
+                                 onChange={(e) => setImportPairData(e.target.value)}
+                                 placeholder="Incolla qui i dati del tuo pair Gun JSON..."
+                                 rows={6}
+                                 disabled={pairLoading}
+                              />
+                           </div>
+
+                           <div className="form-control mb-4">
+                              <label className="label">
+                                 <span className="label-text">Password di decrittazione (se crittografato)</span>
+                              </label>
+                              <input 
+                                 type="password"
+                                 className="input input-bordered"
+                                 value={importPassword}
+                                 onChange={(e) => setImportPassword(e.target.value)}
+                                 placeholder="Inserisci la password se il pair era crittografato"
+                                 disabled={pairLoading}
+                              />
+                           </div>
+
+                           <Button
+                              onClick={handleImportPair}
+                              disabled={pairLoading || !importPairData.trim()}
+                              loading={pairLoading}
+                              variant="primary"
+                           >
+                              {pairLoading ? 'Importando...' : 'Importa e Accedi'}
+                           </Button>
+                        </div>
+                     </div>
+                  </div>
+               </>
+            )}
 
             {/* Logout Section */}
             {auth.isLoggedIn && (

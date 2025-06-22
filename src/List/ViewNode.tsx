@@ -13,6 +13,7 @@ import { formatAuthorDisplay } from '../utils/usernameMap'
 import OGLinkPreview from '../components/OGLinkPreview'
 import { useAuth } from '../utils/AuthContext'
 import { createMarkup } from '../utils'
+import useUpdate from '../api/useUpdate'
 
 type ViewNodeProps = {
    node: DungeonNode
@@ -118,9 +119,13 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
    const keypressed = useKeyboard(['v', 'd'])
    const auth = useAuth()
    const navigate = useNavigate()
-
+   const [createNode] = useUpdate('node')
+   
    // Verifica se l'URL esiste e non è vuoto
-   const hasValidUrl = node?.url && typeof node.url === 'string' && node.url.trim().length > 0
+   const hasValidUrl = node.url && 
+      node.url.trim() !== '' && 
+      node.url !== 'undefined' && 
+      node.url !== 'null'
 
    // Funzione per creare un'anteprima del messaggio
    const createMessagePreview = (message: string, maxLength: number = 150) => {
@@ -232,6 +237,19 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
       }
    }
 
+   // Voting functions
+   const upVote = (node: DungeonNode) => {
+      if (!node.key) return
+      const upVotes = (node?.upVotes || 0) + 1
+      createNode({ key: node.key, upVotes })
+   }
+
+   const downVote = (node: DungeonNode) => {
+      if (!node.key) return
+      const downVotes = (node?.downVotes || 0) + 1
+      createNode({ key: node.key, downVotes })
+   }
+
    return (
       <ViewNodeStyled className="viewNodeStyled" onClick={onPostClicked}>
          <div
@@ -274,7 +292,7 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
             )}
 
             {/* Message preview */}
-            {node.message && (
+         {node.message && (
                <div 
                   style={{ 
                      fontSize: '14px', 
@@ -282,11 +300,11 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
                      marginBottom: '8px',
                      lineHeight: '1.4'
                   }}
-                  dangerouslySetInnerHTML={{ 
+               dangerouslySetInnerHTML={{
                      __html: createMessagePreview(node.message, 150)
-                  }}
+               }}
                />
-            )}
+         )}
          </div>
 
          <Menu>
@@ -330,6 +348,46 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
 
             <div className="nodeLink">
                <Link to={'/node/' + node.key}>node-link</Link>
+            </div>
+            
+            {/* Sistema di voting */}
+            <div style={{ 
+               display: 'flex', 
+               alignItems: 'center', 
+               gap: '4px',
+               paddingLeft: '7px',
+               paddingTop: '5px'
+            }}>
+               <SimpleIcon
+                  content="⇧"
+                  hoverContent={'Upvote'}
+                  style={Styles.positive}
+                  className="simpleIcon"
+                  onClick={(e) => {
+                     e.stopPropagation()
+                     upVote(node)
+                  }}
+               />
+               <span style={{ 
+                  fontSize: '12px', 
+                  fontWeight: 'bold',
+                  color: (node?.upVotes || 0) > (node?.downVotes || 0) ? '#28a745' : 
+                         (node?.downVotes || 0) > (node?.upVotes || 0) ? '#dc3545' : '#666',
+                  minWidth: '20px',
+                  textAlign: 'center'
+               }}>
+                  {(node?.upVotes || 0) - (node?.downVotes || 0)}
+               </span>
+               <SimpleIcon
+                  content="⇩"
+                  hoverContent={'Downvote'}
+                  style={Styles.warning}
+                  className="simpleIcon"
+                  onClick={(e) => {
+                     e.stopPropagation()
+                     downVote(node)
+                  }}
+               />
             </div>
             
             {/* Pulsante Modifica */}

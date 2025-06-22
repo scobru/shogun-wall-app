@@ -16,6 +16,52 @@ const GetAllStyled = styled.div`
       margin: 0 auto;
       padding-top: 42px;
    }
+   
+   @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+   }
+   
+   /* Responsive improvements */
+   @media only screen and (max-width: 768px) {
+      .sorting-controls {
+         flex-direction: column;
+         gap: 8px !important;
+         align-items: stretch !important;
+      }
+      
+      .sorting-buttons {
+         justify-content: center;
+      }
+      
+      .content-info {
+         text-align: center !important;
+         order: -1;
+      }
+      
+      .manual-button-container {
+         justify-content: center !important;
+      }
+      
+      .manual-button {
+         max-width: none !important;
+         width: 100%;
+         max-width: 250px;
+      }
+   }
+   
+   @media only screen and (max-width: 480px) {
+      .sorting-buttons button {
+         min-width: 28px !important;
+         padding: 5px 8px !important;
+         font-size: 11px !important;
+      }
+      
+      .manual-button {
+         font-size: 11px !important;
+         padding: 7px 14px !important;
+      }
+   }
 `
 const ListNodesWrapper = styled.div`
    display: flex;
@@ -140,6 +186,8 @@ const GetAll = () => {
    const [nodes, setNodes] = useState<DungeonNode[] | any[]>([])
    const [filteredNodes, setFilteredNodes] = useState<DungeonNode[] | any[]>([])
    const [longLoad, setLongLoad] = useState<boolean>(false)
+   const [isLoadingContent, setIsLoadingContent] = useState<boolean>(false)
+   const [sortMethod, setSortMethod] = useState<'hot' | 'new' | 'top'>('hot')
    const [searchState, dispatch] = useReducer(searchStateReducer, {
       ticks: 0,
       lastUpdated: new Date(),
@@ -178,16 +226,18 @@ const GetAll = () => {
       }, random(5000, 600000))
    }, [])
 
-   // Get posts from multiple platforms to populate the feed
-   useEffect(() => {
-      // Platform type definitions
+   // Sposta fillWithFun fuori dall'useEffect per renderla accessibile
+   const fillWithFun = async () => {
+      setIsLoadingContent(true)
+      try {
+         // Platform type definitions
       type RedditPost = {
-         author: string
+            author: string
          distinguished: string
          thumbnail: string
-         title: string
+            title: string
          url: string
-         selftext: string
+            selftext: string
          created_utc: Number
       }
 
@@ -197,153 +247,154 @@ const GetAll = () => {
          }
       }
 
-      type HackerNewsItem = {
-         id: number
-         title: string
-         url?: string
-         text?: string
-         by: string
-         time: number
-         score: number
-      }
-
-      type DevToArticle = {
-         id: number
-         title: string
-         description: string
-         url: string
-         user: {
-            name: string
-            username: string
+         type HackerNewsItem = {
+            id: number
+            title: string
+            url?: string
+            text?: string
+            by: string
+            time: number
+            score: number
          }
-         published_at: string
-         tags: string[]
-      }
 
-      // Platform fetchers
-      const fetchRedditPosts = async (): Promise<any> => {
-         const channels = [
+         type DevToArticle = {
+            id: number
+            title: string
+            description: string
+            url: string
+            user: {
+               name: string
+               username: string
+            }
+            published_at: string
+            tags: string[]
+         }
+
+         // Platform fetchers
+         const fetchRedditPosts = async (): Promise<any> => {
+            const channels = [
             'CrazyIdeas',
-            'MorbidReality', 
+            'MorbidReality',
             'TalesFromRetail',
             'AskReddit',
-            'todayilearned',
-            'mildlyinteresting',
-            'Showerthoughts'
-         ]
-         const channel = channels[random(0, channels.length - 1)]
-         
-         const res = await fetch(`https://www.reddit.com/r/${channel}/new.json`)
-         const { data: { children: redditPosts } } = await res.json() as RedditPostResponse
-         const post = redditPosts[random(0, redditPosts?.length - 1)]?.data
-         
-         const postId = `reddit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-         return {
-            user: post.author,
-            thumbnail: post.thumbnail,
-            url: post.url,
-            date: Date.now(),
-            directionText: post.title,
-            message: post.selftext || '[Post senza testo]',
-            redditDate: post.created_utc,
-            id: postId,
-            platform: 'Reddit',
-            channel: channel
-         }
-      }
-
-      const fetchHackerNewsPosts = async (): Promise<any> => {
-         // Get top stories
-         const topStoriesRes = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json')
-         const topStories = await topStoriesRes.json()
-         const randomStoryId = topStories[random(0, Math.min(30, topStories.length - 1))] // Top 30
-         
-         // Get story details
-         const storyRes = await fetch(`https://hacker-news.firebaseio.com/v0/item/${randomStoryId}.json`)
-         const story: HackerNewsItem = await storyRes.json()
-         
-         const postId = `hackernews_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-         return {
-            user: story.by,
-            url: story.url || `https://news.ycombinator.com/item?id=${story.id}`,
-            date: Date.now(),
-            directionText: story.title,
-            message: story.text || '[Link esterno - clicca per leggere]',
-            hackerNewsDate: story.time,
-            id: postId,
-            platform: 'Hacker News',
-            score: story.score
-         }
-      }
-
-      const fetchDevToPosts = async (): Promise<any> => {
-         const res = await fetch('https://dev.to/api/articles?per_page=20&top=1')
-         const articles: DevToArticle[] = await res.json()
-         const article = articles[random(0, articles.length - 1)]
-         
-         const postId = `devto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-         return {
-            user: article.user.username,
-            url: article.url,
-            date: Date.now(),
-            directionText: article.title,
-            message: article.description || '[Articolo su sviluppo - clicca per leggere]',
-            devToDate: article.published_at,
-            id: postId,
-            platform: 'DEV.to',
-            tags: article.tags.join(', ')
-         }
-      }
-
-    
-
-      const fillWithFun = async () => {
-         try {
-            // Randomly select a platform to fetch from
-            const platforms = [
-               { name: 'Reddit', fetcher: fetchRedditPosts, weight: 40 },
-               { name: 'Hacker News', fetcher: fetchHackerNewsPosts, weight: 30 },
-               { name: 'DEV.to', fetcher: fetchDevToPosts, weight: 20 },
+               'todayilearned',
+               'mildlyinteresting',
+               'Showerthoughts'
             ]
+            const channel = channels[random(0, channels.length - 1)]
             
-            // Weighted random selection
-            const totalWeight = platforms.reduce((sum, p) => sum + p.weight, 0)
-            let randomWeight = random(0, totalWeight - 1)
-            let selectedPlatform = platforms[0]
+         const res = await fetch(`https://www.reddit.com/r/${channel}/new.json`)
+            const { data: { children: redditPosts } } = await res.json() as RedditPostResponse
+            const post = redditPosts[random(0, redditPosts?.length - 1)]?.data
             
-            for (const platform of platforms) {
-               if (randomWeight < platform.weight) {
-                  selectedPlatform = platform
-                  break
-               }
-               randomWeight -= platform.weight
+            const postId = `reddit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            return {
+               user: post.author,
+               thumbnail: post.thumbnail,
+               url: post.url,
+               date: Date.now(),
+               directionText: post.title,
+               message: post.selftext || '[Post senza testo]',
+               redditDate: post.created_utc,
+               id: postId,
+               platform: 'Reddit',
+               channel: channel
             }
-            
-            console.log(`🎯 [GetAll] Fetching from: ${selectedPlatform.name}`)
-            const post = await selectedPlatform.fetcher()
-            
-            if (!post) {
-               console.log('❌ [GetAll] No post returned, skipping...')
-               return
-            }
-            
-            console.log('🔍 [GetAll] Salvando post da', post.platform + ':', {
-               postId: post.id,
-               user: post.user,
-               platform: post.platform,
-               directionText: post.directionText,
-               messageLength: post.message ? post.message.length : 0,
-               url: post.url
-            })
-            
-            gun.get(namespace + `/node`)
-               .get(post.id)
-               .put(post, (awk) => console.log(`📝 [GetAll] Post da ${post.platform} salvato:`, awk))
-               
-         } catch (error) {
-            console.error('❌ [GetAll] Error fetching platform content:', error)
          }
+
+         const fetchHackerNewsPosts = async (): Promise<any> => {
+            // Get top stories
+            const topStoriesRes = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json')
+            const topStories = await topStoriesRes.json()
+            const randomStoryId = topStories[random(0, Math.min(30, topStories.length - 1))] // Top 30
+            
+            // Get story details
+            const storyRes = await fetch(`https://hacker-news.firebaseio.com/v0/item/${randomStoryId}.json`)
+            const story: HackerNewsItem = await storyRes.json()
+            
+            const postId = `hackernews_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            return {
+               user: story.by,
+               url: story.url || `https://news.ycombinator.com/item?id=${story.id}`,
+               date: Date.now(),
+               directionText: story.title,
+               message: story.text || '[Link esterno - clicca per leggere]',
+               hackerNewsDate: story.time,
+               id: postId,
+               platform: 'Hacker News',
+               score: story.score
+            }
+         }
+
+         const fetchDevToPosts = async (): Promise<any> => {
+            const res = await fetch('https://dev.to/api/articles?per_page=20&top=1')
+            const articles: DevToArticle[] = await res.json()
+            const article = articles[random(0, articles.length - 1)]
+            
+            const postId = `devto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            return {
+               user: article.user.username,
+               url: article.url,
+            date: Date.now(),
+               directionText: article.title,
+               message: article.description || '[Articolo su sviluppo - clicca per leggere]',
+               devToDate: article.published_at,
+               id: postId,
+               platform: 'DEV.to',
+               tags: article.tags.join(', ')
+            }
+         }
+
+         // Randomly select a platform to fetch from
+         const platforms = [
+            { name: 'Reddit', fetcher: fetchRedditPosts, weight: 40 },
+            { name: 'Hacker News', fetcher: fetchHackerNewsPosts, weight: 30 },
+            { name: 'DEV.to', fetcher: fetchDevToPosts, weight: 20 },
+         ]
+         
+         // Weighted random selection
+         const totalWeight = platforms.reduce((sum, p) => sum + p.weight, 0)
+         let randomWeight = random(0, totalWeight - 1)
+         let selectedPlatform = platforms[0]
+         
+         for (const platform of platforms) {
+            if (randomWeight < platform.weight) {
+               selectedPlatform = platform
+               break
+            }
+            randomWeight -= platform.weight
+         }
+         
+         console.log(`🎯 [GetAll] Fetching from: ${selectedPlatform.name}`)
+         const post = await selectedPlatform.fetcher()
+         
+         if (!post) {
+            console.log('❌ [GetAll] No post returned, skipping...')
+            return
+         }
+         
+         console.log('🔍 [GetAll] Salvando post da', post.platform + ':', {
+            postId: post.id,
+            user: post.user,
+            platform: post.platform,
+            directionText: post.directionText,
+            messageLength: post.message ? post.message.length : 0,
+            url: post.url
+         })
+         
+         gun.get(namespace + `/node`)
+            .get(post.id)
+            .put(post, (awk) => console.log(`📝 [GetAll] Post da ${post.platform} salvato:`, awk))
+            
+      } catch (error) {
+         console.error('❌ [GetAll] Error fetching platform content:', error)
+      } finally {
+         setIsLoadingContent(false)
       }
+   }
+
+   // Get posts from multiple platforms to populate the feed
+   useEffect(() => {
       setTimeout(async () => {
          const nodes = await getNodes()
          if (!nodes?.length) {
@@ -413,16 +464,62 @@ const GetAll = () => {
                if (isNull(immutableNode) || !isString(immutableNode.message) || immutableNode.message.trim() === '') {
                   return filtered
                }
-               return [...filtered, immutableNode].sort(
-                  (node, nodeB) => nodeB.date - node.date
-               )
+               // Applica il sorting dopo aver aggiunto il nuovo nodo
+               const updatedNodes = [...filtered, immutableNode]
+               return sortNodes(updatedNodes)
             })
          })
       return () => {
          allNodesQuery.off()
          setNodes([])
       }
-   }, [])
+   }, [sortMethod]) // Aggiungi sortMethod come dipendenza
+
+   // Riordina i nodi quando cambia il metodo di sorting
+   useEffect(() => {
+      setNodes(currentNodes => sortNodes(currentNodes))
+   }, [sortMethod])
+
+   // Algoritmo di scoring per il sorting intelligente
+   const calculateHotScore = (node: DungeonNode): number => {
+      const upvotes = Number(node.upVotes) || 0
+      const downvotes = Number(node.downVotes) || 0
+      const score = upvotes - downvotes
+      
+      // Calcola l'età del post in ore
+      const now = Date.now()
+      const postTime = Number(node.date) || now
+      const ageInHours = (now - postTime) / (1000 * 60 * 60)
+      
+      // Algoritmo "Hot" simile a Reddit
+      // Score più alto = più upvotes, penalizza contenuti vecchi
+      const order = Math.log10(Math.max(Math.abs(score), 1))
+      const sign = score > 0 ? 1 : score < 0 ? -1 : 0
+      const seconds = (postTime - 1134028003000) / 1000 // Epoch di riferimento
+      
+      return sign * order + seconds / 45000 - (ageInHours * 0.1)
+   }
+
+   const sortNodes = (nodes: DungeonNode[]): DungeonNode[] => {
+      const nodesCopy = [...nodes]
+      
+      switch (sortMethod) {
+         case 'hot':
+            return nodesCopy.sort((a, b) => calculateHotScore(b) - calculateHotScore(a))
+         
+         case 'top':
+            return nodesCopy.sort((a, b) => {
+               const scoreA = (Number(a.upVotes) || 0) - (Number(a.downVotes) || 0)
+               const scoreB = (Number(b.upVotes) || 0) - (Number(b.downVotes) || 0)
+               if (scoreA !== scoreB) return scoreB - scoreA
+               return (Number(b.date) || 0) - (Number(a.date) || 0) // Fallback su data
+            })
+         
+         case 'new':
+         default:
+            return nodesCopy.sort((a, b) => (Number(b.date) || 0) - (Number(a.date) || 0))
+      }
+   }
 
    return (
       <GetAllStyled>
@@ -443,6 +540,149 @@ const GetAll = () => {
                      onFilteredNodesChange={setFilteredNodes} 
                   />
                )}
+               
+               {/* Selettore metodo di ordinamento */}
+               <div className="sorting-controls" style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  margin: '12px 0 8px 0',
+                  gap: '12px',
+                  flexWrap: 'wrap'
+               }}>
+                  <div className="sorting-buttons" style={{
+                     display: 'flex',
+                     background: '#f8f9fa',
+                     borderRadius: '6px',
+                     padding: '2px',
+                     border: '1px solid #e9ecef',
+                     fontSize: '12px'
+                  }}>
+                     {[
+                        { key: 'hot', label: '🔥', desc: 'Algoritmo intelligente' },
+                        { key: 'top', label: '⭐', desc: 'Più votati' },
+                        { key: 'new', label: '🆕', desc: 'Più recenti' }
+                     ].map(({ key, label, desc }) => (
+                        <button
+                           key={key}
+                           onClick={() => setSortMethod(key as 'hot' | 'new' | 'top')}
+                           style={{
+                              background: sortMethod === key 
+                                 ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                 : 'transparent',
+                              color: sortMethod === key ? 'white' : '#666',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '6px 10px',
+                              fontSize: '12px',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              minWidth: '32px'
+                           }}
+                           title={desc}
+                           onMouseEnter={(e) => {
+                              if (sortMethod !== key) {
+                                 e.currentTarget.style.background = '#e9ecef'
+                                 e.currentTarget.style.color = '#333'
+                              }
+                           }}
+                           onMouseLeave={(e) => {
+                              if (sortMethod !== key) {
+                                 e.currentTarget.style.background = 'transparent'
+                                 e.currentTarget.style.color = '#666'
+                              }
+                           }}
+                        >
+                           {label}
+                        </button>
+                     ))}
+                  </div>
+                  
+                  <div className="content-info" style={{
+                     fontSize: '10px',
+                     color: '#888',
+                     fontStyle: 'italic',
+                     flex: '1',
+                     textAlign: 'center',
+                     minWidth: '120px'
+                  }}>
+                     {sortMethod === 'hot' && 'Contenuti trending'}
+                     {sortMethod === 'top' && 'Ordinati per voti'}
+                     {sortMethod === 'new' && 'Ordinati per data'}
+                  </div>
+
+                  <div style={{
+                     fontSize: '10px',
+                     color: '#666',
+                     fontWeight: '500'
+                  }}>
+                     {nodes.length === 0 ? 'Nessun contenuto' : `${nodes.length} contenuti`}
+                  </div>
+               </div>
+               
+               {/* Pulsante per caricare contenuti manualmente */}
+               <div className="manual-button-container" style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  margin: '8px 0 16px 0'
+               }}>
+                  <button
+                     className="manual-button"
+                     onClick={fillWithFun}
+                     disabled={isLoadingContent}
+                     style={{
+                        background: isLoadingContent 
+                           ? 'linear-gradient(135deg, #ccc 0%, #999 100%)'
+                           : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        padding: '8px 16px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: isLoadingContent ? 'not-allowed' : 'pointer',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                        transition: 'all 0.2s ease',
+                        transform: 'translateY(0)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        maxWidth: '200px'
+                     }}
+                     onMouseEnter={(e) => {
+                        if (!isLoadingContent) {
+                           e.currentTarget.style.transform = 'translateY(-1px)'
+                           e.currentTarget.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)'
+                        }
+                     }}
+                     onMouseLeave={(e) => {
+                        if (!isLoadingContent) {
+                           e.currentTarget.style.transform = 'translateY(0)'
+                           e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)'
+                        }
+                     }}
+                  >
+                     {isLoadingContent ? (
+                        <>
+                           <div style={{
+                              width: '14px',
+                              height: '14px',
+                              border: '2px solid transparent',
+                              borderTop: '2px solid white',
+                              borderRadius: '50%',
+                              animation: 'spin 1s linear infinite'
+                           }} />
+                           Caricamento...
+                        </>
+                     ) : (
+                        <>
+                           🎲 Carica Contenuto
+                        </>
+                     )}
+                  </button>
+               </div>
+               
                {nodes.length && (
                   <SearchHighlights {...searchState} numNodes={filteredNodes.length || nodes.length} />
                )}
