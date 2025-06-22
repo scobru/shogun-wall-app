@@ -1,5 +1,5 @@
 import { DungeonNode } from 'Nodes'
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import gun, { namespace } from './gun'
 
 // Gestione globale dei listener per prevenire duplicazioni

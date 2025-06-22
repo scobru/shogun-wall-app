@@ -77,17 +77,23 @@ const UserProfile: React.FC<UserProfileProps> = () => {
       <div className="user-profile-container max-w-6xl mx-auto p-6">
          {/* Header */}
          <div className="flex justify-between items-center mb-6 pb-4 border-b border-base-300">
-            <div>
-               <h1 className="text-3xl font-bold text-base-content mb-2">
+            <div className="flex-1 min-w-0">
+               <h1 className="text-3xl font-bold text-base-content mb-2 break-words">
                   Profilo di {formatAuthorDisplay(username)}
                </h1>
-               <div className="flex gap-4 text-sm text-base-content/70">
+               <div className="flex flex-wrap gap-4 text-sm text-base-content/70">
                   <span>{userPosts.length} post</span>
                   <span>•</span>
                   <span>{userNodes.length} nodi</span>
                   <span>•</span>
                   <span>{totalContent} contenuti totali</span>
                </div>
+               {/* Show if this is a public key */}
+               {username && username.length > 50 && username.includes('.') && (
+                  <div className="mt-2 text-xs text-base-content/50 font-mono break-all">
+                     ID: {username}
+                  </div>
+               )}
             </div>
             <div className="flex gap-3">
                <button 

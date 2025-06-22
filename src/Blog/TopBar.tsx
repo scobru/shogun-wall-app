@@ -10,6 +10,8 @@ import { useClock } from './useClock'
 import { Button } from 'Interface'
 import { DarkToggle } from './DarkToggle'
 
+import 'shogun-button-react/styles.css'
+
 const TopBarStyled = styled.div`
    background: var(--surface);
    border-bottom: 1px solid var(--border);

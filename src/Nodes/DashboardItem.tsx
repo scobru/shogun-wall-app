@@ -1,10 +1,12 @@
 import styled from 'styled-components/macro'
 import { Link, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { SimpleIcon, Styles } from '../Interface'
 import { ITEM_BORDER } from './ViewNode.styled'
 import { DungeonNode, GunId } from '.'
 import useUpdate from '../api/useUpdate'
 import { useAuth } from '../utils/AuthContext'
+import { formatAuthorDisplay } from '../utils/usernameMap'
 
 export const NodeLink = styled(Link)`
    padding: 1rem 1rem;
@@ -146,6 +148,29 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
    const navigate = useNavigate()
    const auth = useAuth()
 
+   // Debug logging per il nodo
+   useEffect(() => {
+      console.log('🔍 [DashboardItem] Node data:', {
+         id,
+         node,
+         hasNode: !!node,
+         directionText: node?.directionText,
+         user: node?.user,
+         message: node?.message
+      })
+   }, [id, node])
+
+   // Se non abbiamo dati del nodo, mostra placeholder
+   if (!node) {
+      return (
+         <LinkWrapper className="linkWrapper">
+            <div style={{ flex: 1, padding: '10px', color: '#999', fontStyle: 'italic' }}>
+               Caricamento nodo {id}...
+            </div>
+         </LinkWrapper>
+      )
+   }
+
    const itemClicked = (id: string) => {
       if (id) {
          navigate(`/dashboard/${id}`)
@@ -206,12 +231,9 @@ const DashboardItem = ({ id, pruneRight, node, onUpdate }: NodeRowProps) => {
                      cursor: node.user ? 'pointer' : 'default',
                      textDecoration: node.user ? 'underline' : 'none'
                   }}
-                  title={node.user ? `Vedi tutti i contenuti di ${node.user}` : undefined}
+                  title={node.user ? `Vedi tutti i contenuti di ${formatAuthorDisplay(node.user)}` : undefined}
                >
-                  {node.userPub 
-                     ? `${node.userPub.substring(0, 12)}...`
-                     : (node.user || 'Unknown')
-                  }
+                  {formatAuthorDisplay(node.user || 'Unknown')}
                </span>
                {node.userType === 'shogun' && (
                   <span className="shogun-badge">SHOGUN</span>

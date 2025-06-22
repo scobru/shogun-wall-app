@@ -7,7 +7,6 @@ export { default as NewPost } from './NewPost'
 export { default as Profile } from './Profile'
 export { default as TopBar } from './TopBar'
 export { default as ViewPostList } from './Blog'
-export { default as UserPosts } from './UserPosts'
 export { default as UserProfile } from './UserProfile'
 
 export type Post = {

@@ -4,7 +4,7 @@ import { random } from 'lodash'
 
 export default function useViewCount(nodeId) {
    const [views, setViews] = useState(1)
-   const [intervalLength, setIntervalLength] = useState(random(2500, 10000))
+   const [intervalLength] = useState(random(2500, 10000))
    const lastUpdateSent = useRef(new Date())
 
    useEffect(() => {
@@ -35,6 +35,10 @@ export default function useViewCount(nodeId) {
 
    const sendViewsRequest = (nodeId, views: number) => {
       if (typeof views === 'undefined') return
+      if (!nodeId || nodeId === '') {
+         console.warn('0 length key!', 'Cannot send views request for empty nodeId')
+         return
+      }
       return gun
          .get(namespace + '/views')
          .get(nodeId)
@@ -44,7 +48,8 @@ export default function useViewCount(nodeId) {
    }
 
    const onViews = (callback) => {
-      if (!nodeId) {
+      if (!nodeId || nodeId === '') {
+         console.warn('0 length key!', 'Cannot listen to views for empty nodeId')
          return () => {}
       }
       return gun

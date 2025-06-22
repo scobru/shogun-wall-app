@@ -5,6 +5,14 @@ export const Wrapper = styled.div`
    flex-direction: column;
    height: auto;
    align-items: stretch;
+   width: 100%;
+   max-width: 700px;
+   margin: 0 auto;
+   padding: var(--space-4, 1rem);
+   
+   @media (min-width: 768px) {
+      padding: var(--space-6, 1.5rem);
+   }
 `
 
 export const Input = styled.input`

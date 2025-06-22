@@ -178,15 +178,16 @@ const GetAll = () => {
       }, random(5000, 600000))
    }, [])
 
-   // Get reddit posts to start filling in some content
+   // Get posts from multiple platforms to populate the feed
    useEffect(() => {
+      // Platform type definitions
       type RedditPost = {
-         author: string //maps to user
+         author: string
          distinguished: string
          thumbnail: string
-         title: string //maps to node.directionText
+         title: string
          url: string
-         selftext: string //maps to node.message
+         selftext: string
          created_utc: Number
       }
 
@@ -195,37 +196,153 @@ const GetAll = () => {
             children: [{ data: RedditPost }]
          }
       }
-      const fillWithFun = async () => {
-         const channel = [
+
+      type HackerNewsItem = {
+         id: number
+         title: string
+         url?: string
+         text?: string
+         by: string
+         time: number
+         score: number
+      }
+
+      type DevToArticle = {
+         id: number
+         title: string
+         description: string
+         url: string
+         user: {
+            name: string
+            username: string
+         }
+         published_at: string
+         tags: string[]
+      }
+
+      // Platform fetchers
+      const fetchRedditPosts = async (): Promise<any> => {
+         const channels = [
             'CrazyIdeas',
-            'MorbidReality',
+            'MorbidReality', 
             'TalesFromRetail',
             'AskReddit',
-         ][random(0, 3)]
+            'todayilearned',
+            'mildlyinteresting',
+            'Showerthoughts'
+         ]
+         const channel = channels[random(0, channels.length - 1)]
+         
          const res = await fetch(`https://www.reddit.com/r/${channel}/new.json`)
-         const {
-            data: { children: redditPosts },
-         } = (await res.json()) as RedditPostResponse
-         const {
-            author: user,
-            thumbnail,
-            title: directionText,
-            selftext: message,
-            url,
-            created_utc: date,
-         }: RedditPost = redditPosts[random(0, redditPosts?.length - 1)]?.data
-         const post: any = {
-            user,
-            thumbnail,
-            url,
+         const { data: { children: redditPosts } } = await res.json() as RedditPostResponse
+         const post = redditPosts[random(0, redditPosts?.length - 1)]?.data
+         
+         const postId = `reddit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+         return {
+            user: post.author,
+            thumbnail: post.thumbnail,
+            url: post.url,
             date: Date.now(),
-            directionText,
-            message,
-            redditDate: date,
+            directionText: post.title,
+            message: post.selftext || '[Post senza testo]',
+            redditDate: post.created_utc,
+            id: postId,
+            platform: 'Reddit',
+            channel: channel
          }
-         gun.get(namespace + `/node`)
-            .get(user)
-            .put(post, (awk) => console.log(awk))
+      }
+
+      const fetchHackerNewsPosts = async (): Promise<any> => {
+         // Get top stories
+         const topStoriesRes = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json')
+         const topStories = await topStoriesRes.json()
+         const randomStoryId = topStories[random(0, Math.min(30, topStories.length - 1))] // Top 30
+         
+         // Get story details
+         const storyRes = await fetch(`https://hacker-news.firebaseio.com/v0/item/${randomStoryId}.json`)
+         const story: HackerNewsItem = await storyRes.json()
+         
+         const postId = `hackernews_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+         return {
+            user: story.by,
+            url: story.url || `https://news.ycombinator.com/item?id=${story.id}`,
+            date: Date.now(),
+            directionText: story.title,
+            message: story.text || '[Link esterno - clicca per leggere]',
+            hackerNewsDate: story.time,
+            id: postId,
+            platform: 'Hacker News',
+            score: story.score
+         }
+      }
+
+      const fetchDevToPosts = async (): Promise<any> => {
+         const res = await fetch('https://dev.to/api/articles?per_page=20&top=1')
+         const articles: DevToArticle[] = await res.json()
+         const article = articles[random(0, articles.length - 1)]
+         
+         const postId = `devto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+         return {
+            user: article.user.username,
+            url: article.url,
+            date: Date.now(),
+            directionText: article.title,
+            message: article.description || '[Articolo su sviluppo - clicca per leggere]',
+            devToDate: article.published_at,
+            id: postId,
+            platform: 'DEV.to',
+            tags: article.tags.join(', ')
+         }
+      }
+
+    
+
+      const fillWithFun = async () => {
+         try {
+            // Randomly select a platform to fetch from
+            const platforms = [
+               { name: 'Reddit', fetcher: fetchRedditPosts, weight: 40 },
+               { name: 'Hacker News', fetcher: fetchHackerNewsPosts, weight: 30 },
+               { name: 'DEV.to', fetcher: fetchDevToPosts, weight: 20 },
+            ]
+            
+            // Weighted random selection
+            const totalWeight = platforms.reduce((sum, p) => sum + p.weight, 0)
+            let randomWeight = random(0, totalWeight - 1)
+            let selectedPlatform = platforms[0]
+            
+            for (const platform of platforms) {
+               if (randomWeight < platform.weight) {
+                  selectedPlatform = platform
+                  break
+               }
+               randomWeight -= platform.weight
+            }
+            
+            console.log(`🎯 [GetAll] Fetching from: ${selectedPlatform.name}`)
+            const post = await selectedPlatform.fetcher()
+            
+            if (!post) {
+               console.log('❌ [GetAll] No post returned, skipping...')
+               return
+            }
+            
+            console.log('🔍 [GetAll] Salvando post da', post.platform + ':', {
+               postId: post.id,
+               user: post.user,
+               platform: post.platform,
+               directionText: post.directionText,
+               messageLength: post.message ? post.message.length : 0,
+               url: post.url
+            })
+            
+            gun.get(namespace + `/node`)
+               .get(post.id)
+               .put(post, (awk) => console.log(`📝 [GetAll] Post da ${post.platform} salvato:`, awk))
+               
+         } catch (error) {
+            console.error('❌ [GetAll] Error fetching platform content:', error)
+         }
       }
       setTimeout(async () => {
          const nodes = await getNodes()
@@ -293,7 +410,7 @@ const GetAll = () => {
                )
                // if the new node is null ignore it
                // if the new node's message has nothing on it, ignore it
-               if (isNull(immutableNode) || !isString(immutableNode.message)) {
+               if (isNull(immutableNode) || !isString(immutableNode.message) || immutableNode.message.trim() === '') {
                   return filtered
                }
                return [...filtered, immutableNode].sort(

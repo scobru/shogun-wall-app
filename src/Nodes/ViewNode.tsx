@@ -15,10 +15,12 @@ import {
 } from './ViewNode.styled'
 import LoadingWheel from '../Interface/LoadingWheel'
 import useKeyboard from '../utils/useKeyboard'
-import { createMarkup, linkify } from '../utils'
+import { createMarkup } from '../utils'
 import useViewCount from 'List/useViewCount'
 import ViewCount from 'List/ViewCount'
 import OGLinkPreview from '../components/OGLinkPreview'
+import { formatAuthorDisplay } from '../utils/usernameMap'
+import { useAuth } from '../utils/AuthContext'
 
 /**
  *
@@ -37,9 +39,11 @@ const ViewNode = () => {
    const [directions, setDirections] = useState<any>({})
    const [showHidden, setShowHidden] = useState<Boolean>(false)
    const keypressed = useKeyboard(['h'])
-   const { key = '' } = useParams()
+   const { id: key = '' } = useParams()
+   console.log('🔍 [ViewNode] URL key extracted:', key, 'Type:', typeof key, 'Length:', key.length)
    const [views] = useViewCount(key)
    const navigate = useNavigate()
+   const auth = useAuth()
 
    // init the page title
    useEffect(() => {
@@ -60,6 +64,11 @@ const ViewNode = () => {
     *    REACT, THE PARTS THAT MATTER
     */
    useEffect(() => {
+      if (!key || key === '') {
+         console.warn('0 length key!', 'Cannot load node data for empty key')
+         return
+      }
+      
       setNode(undefined)
       const d = gun
          .get(namespace + '/node/' + key)
@@ -75,6 +84,11 @@ const ViewNode = () => {
 
    // Function to load/refresh directions (comments)
    const loadDirections = () => {
+      if (!key || key === '') {
+         console.warn('0 length key!', 'Cannot load directions for empty key')
+         return () => {}
+      }
+      
       setDirections({})
       const d = gun
          .get(namespace + '/node')
@@ -105,6 +119,15 @@ const ViewNode = () => {
    }, [key, showHidden])
 
    const pruneRight = (id: GunId) => {
+      if (!key || key === '') {
+         console.warn('0 length key!', 'Cannot prune direction for empty key')
+         return
+      }
+      if (!id || id === '') {
+         console.warn('0 length id!', 'Cannot prune direction for empty id')
+         return
+      }
+      
       const newDirections = { ...directions }
       delete newDirections[id]
       setDirections(newDirections)
@@ -143,6 +166,55 @@ const ViewNode = () => {
 
    const commentsCount = Object.keys(directions).length
 
+   // Verifica se l'utente può modificare il nodo
+   const canEditNode = (node: DungeonNode) => {
+      if (!node) return false
+      // Se l'utente è autenticato con Shogun, può modificare solo i suoi nodi
+      if (auth.isAuthenticated) {
+         return node.userPub === auth.userPub || node.user === auth.username
+      }
+      // Se è guest, può modificare solo i nodi con lo stesso username locale
+      return node.user === auth.currentUsername
+   }
+
+   const handleEditNode = () => {
+      if (key && node && canEditNode(node)) {
+         navigate(`/dashboard/${key}`)
+      }
+   }
+
+   // Se la chiave è vuota, mostra un messaggio di errore  
+   if (!key || key === '') {
+      return (
+         <ViewNodeStyled>
+            <MessageWrapper className="messageWrapper">
+               <div style={{ 
+                  textAlign: 'center', 
+                  padding: '40px 20px',
+                  color: 'var(--error-600)'
+               }}>
+                  <h2>Errore: Nodo non trovato</h2>
+                  <p>L'ID del nodo non è valido o è vuoto.</p>
+                  <button 
+                     onClick={() => navigate('/all')}
+                     style={{
+                        marginTop: '16px',
+                        padding: '8px 16px',
+                        backgroundColor: 'var(--primary-500)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                     }}
+                  >
+                     Torna alla lista
+                  </button>
+               </div>
+            </MessageWrapper>
+         </ViewNodeStyled>
+      )
+   }
+
    return (
       <ViewNodeStyled>
          {/* Header con navigazione */}
@@ -150,7 +222,47 @@ const ViewNode = () => {
             <BackButton onClick={goback}>
                ← {node?.head ? 'Torna al post padre' : 'Torna a tutti i post'}
             </BackButton>
-            <ViewCount count={views} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+               <ViewCount count={views} />
+               
+               {/* Pulsante Modifica */}
+               {node && canEditNode(node) && (
+                  <button
+                     onClick={handleEditNode}
+                     style={{
+                        padding: '8px 16px',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 3px 6px rgba(102, 126, 234, 0.3)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.8px'
+                     }}
+                     onMouseOver={(e) => {
+                        const target = e.target as HTMLButtonElement;
+                        target.style.transform = 'translateY(-2px)';
+                        target.style.boxShadow = '0 6px 12px rgba(102, 126, 234, 0.4)';
+                     }}
+                     onMouseOut={(e) => {
+                        const target = e.target as HTMLButtonElement;
+                        target.style.transform = 'translateY(0)';
+                        target.style.boxShadow = '0 3px 6px rgba(102, 126, 234, 0.3)';
+                     }}
+                     title="Modifica questo contenuto nella dashboard"
+                  >
+                     <span style={{ fontSize: '14px' }}>✏️</span>
+                     <span>Modifica</span>
+                  </button>
+               )}
+            </div>
          </BackSectionWrapper>
 
          {/* Contenuto principale del post */}
@@ -172,7 +284,7 @@ const ViewNode = () => {
             <MessageTop className="messageTop">
                {node?.user && (
                   <Username className={node?.userType === 'shogun' ? 'shogun-user' : ''}>
-                     @{node?.user}
+                     @{formatAuthorDisplay(node?.user)}
                      {node?.userType === 'shogun' && (
                         <span className="verified-badge">✓</span>
                      )}

@@ -1,11 +1,11 @@
 import styled from 'styled-components/macro'
 import { Link } from 'react-router-dom'
 import gun, { namespace } from '../api/gun'
-import { SimpleIcon, Styles } from '../Interface'
-import { ITEM_BORDER, Username } from './ViewNode.styled'
+import { Username } from './ViewNode.styled'
 import { GunId } from '.'
 import { useState, useEffect } from 'react'
 import OGLinkPreview from '../components/OGLinkPreview'
+import { formatAuthorDisplay } from '../utils/usernameMap'
 
 export const LinkWrapper = styled.div`
    margin-bottom: 16px;
@@ -179,7 +179,7 @@ const NodeRow = ({ directionKey, directions, pruneRight }: NodeRowProps) => {
                   <div className="comment-header">
                      <div className="comment-meta">
                         <Username className={commentNode.userType === 'shogun' ? 'shogun-user' : ''}>
-                           @{commentNode.user || 'anon'}
+                           @{formatAuthorDisplay(commentNode.user || 'anon')}
                            {commentNode.userType === 'shogun' && (
                               <span className="verified-badge">✓</span>
                            )}

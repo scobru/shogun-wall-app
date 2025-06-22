@@ -1,4 +1,4 @@
-export default {
+const timeConstants = {
     0: {
         top: 1,
         topRight: 1,
@@ -89,4 +89,6 @@ export default {
         bottomLeft: 0,
         bottom: 0,
     },
-}
+};
+
+export default timeConstants;

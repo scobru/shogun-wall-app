@@ -64,7 +64,7 @@ const useCreateNodeWithAuth = (onNodeCreated?: (node: any) => void, model: strin
       let enrichedData = {
          ...data,
          user: auth.isAuthenticated 
-            ? (auth.username || 'shogun_user')
+            ? (auth.currentUsername || auth.username || 'shogun_user')
             : (data.user || auth.currentUsername || 'anonymous'),
          userType: auth.isAuthenticated ? 'shogun' : 'guest',
          userPub: auth.isAuthenticated ? auth.userPub : null,

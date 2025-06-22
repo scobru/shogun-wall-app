@@ -1,11 +1,12 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { ShogunCore } from 'shogun-core';
-import { ShogunButtonProvider, useShogun as useShogunButton } from 'shogun-button-react';
+import { ShogunButtonProvider, useShogun } from 'shogun-button-react';
 import useLocalStorage from './useLocalStorage';
 import gun from '../api/gun';
+import { getStoredUsernameForPublicKey, formatPublicKey } from './usernameMap';
 import 'gun/sea.js';
 
-// Define the shape of our combined auth context
+// Define the shape of our auth context
 interface AuthContextType {
   isLoggedIn: boolean;
   isAuthenticated: boolean;
@@ -23,99 +24,61 @@ interface AuthContextType {
   shogun: ShogunCore | null;
   login: (method: string, ...args: any[]) => Promise<any>;
   signUp: (method: string, ...args: any[]) => Promise<any>;
+  refreshUsername: () => Promise<void>;
 }
 
-// 1. Create a new AuthContext for the Wallie.io app
+// Create AuthContext
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 2. The main provider that will be used in App.tsx
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [shogun, setShogun] = useState<ShogunCore | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Initialize ShogunCore once
-  useEffect(() => {
-    const initializeShogun = async () => {
-      try {
-        console.log('🚀 Initializing ShogunCore for Wallie.io...');
-        const shogunCore = new ShogunCore({
-          gunInstance: gun,
-          peers: ["http://localhost:8765/gun"],
-          web3: { enabled: true },
-          webauthn: { enabled: true, rpName: "Wallie.io" },
-          nostr: { enabled: true },
-          oauth: {
-            enabled: true,
-            providers: {
-              google: {
-                clientId: "15241942495-ftd3cs98qvem6snh6isbabc3adoc9f4p.apps.googleusercontent.com",
-                clientSecret: "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",
-                redirectUri: "http://localhost:3000/auth/callback",
-                scope: ["openid", "email", "profile"],
-              },
-            },
-          },
-        });
-        setShogun(shogunCore);
-        console.log('✅ ShogunCore initialized for Wallie.io');
-        setLoading(false);
-      } catch (err: unknown) {
-        console.error('❌ Error initializing ShogunCore:', err);
-        setError(err instanceof Error ? err.message : String(err));
-        setLoading(false);
-      }
-    };
-    initializeShogun();
-  }, []);
-
-  if (loading) {
-    return <div>🔄 Loading Shogun...</div>;
-  }
-
-  if (error) {
-    return <div>❌ Error: {error}</div>;
-  }
-
-  if (!shogun) {
-    return <div>🔄 Initializing Shogun...</div>;
-  }
-
-  // Wrap children with ShogunButtonProvider which now holds the auth state
-  return (
-    <ShogunButtonProvider sdk={shogun} options={{}} onError={setError}>
-      <AuthBridge>{children}</AuthBridge>
-    </ShogunButtonProvider>
-  );
-};
-
-// 3. A bridge component to map the context from shogun-button-react to our app's context
-const AuthBridge: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const shogunButtonContext = useShogunButton();
+// Bridge component to map shogun-button-react context to our app context
+const AuthBridge: React.FC<{ children: ReactNode; shogun: ShogunCore }> = ({ children, shogun }) => {
+  const shogunContext = useShogun();
   const [localUsername, setLocalUsername] = useLocalStorage<string | null>('wallie_username', null);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
+  const [storedUsername, setStoredUsername] = useState<string | null>(null);
 
-  const formatPublicKey = (pubKey: string): string => {
-    if (!pubKey || pubKey.length < 10) return pubKey;
-    return `${pubKey.slice(0, 6)}...${pubKey.slice(-4)}`;
+  // Use the improved formatPublicKey from usernameMap
+
+  // Function to refresh stored username from Gun.js
+  const refreshUsername = async (): Promise<void> => {
+    if (shogunContext.userPub) {
+      try {
+        const username = await getStoredUsernameForPublicKey(shogunContext.userPub);
+        setStoredUsername(username);
+      } catch (error) {
+        console.error('Error refreshing username:', error);
+      }
+    }
   };
+
+  // Load stored username when userPub changes
+  useEffect(() => {
+    if (shogunContext.userPub) {
+      refreshUsername();
+    } else {
+      setStoredUsername(null);
+    }
+  }, [shogunContext.userPub]);
   
   const value: AuthContextType = {
-    ...shogunButtonContext,
-    isAuthenticated: shogunButtonContext.isLoggedIn,
-    userPubFormatted: shogunButtonContext.userPub ? formatPublicKey(shogunButtonContext.userPub) : null,
+    ...shogunContext,
+    isAuthenticated: shogunContext.isLoggedIn,
+    userPubFormatted: shogunContext.userPub ? formatPublicKey(shogunContext.userPub, 16) : null,
     localUsername,
     setLocalUsername,
-    currentUsername: shogunButtonContext.username || localUsername,
-    hasAnyAuth: shogunButtonContext.isLoggedIn || !!localUsername,
-    loading: false, // Loading is handled in the parent
+    currentUsername: storedUsername || shogunContext.username || localUsername,
+    hasAnyAuth: shogunContext.isLoggedIn || !!localUsername,
+    loading: false,
     error: error,
+    shogun: shogun,
+    refreshUsername,
     redirectToAuth: () => {
       alert('Authentication is available via the Shogun button in the top right!');
     },
     logout: () => {
-        shogunButtonContext.logout();
-        setLocalUsername(null);
+      shogunContext.logout();
+      setLocalUsername(null);
+      setStoredUsername(null);
     }
   };
 
@@ -126,7 +89,107 @@ const AuthBridge: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
 };
 
-// 4. The final hook used by the application components
+// Main AuthProvider component
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [shogun, setShogun] = useState<ShogunCore | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize ShogunCore once
+  useEffect(() => {
+    const initializeShogun = async () => {
+      try {
+        console.log('🚀 Initializing ShogunCore for Wallie.io...');
+        
+        // Wait a bit for Gun to be fully initialized
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Verify Gun instance is properly initialized
+        if (!gun || typeof gun.user !== 'function') {
+          throw new Error('Gun instance is not properly initialized');
+        }
+        
+        const shogunCore = new ShogunCore({
+          gunInstance: gun as any,
+          web3: { enabled: true },
+          webauthn: { 
+            enabled: true, 
+            rpName: "HAL9000" 
+          },
+          nostr: { enabled: true },
+        });
+        
+        setShogun(shogunCore);
+        console.log('✅ ShogunCore initialized for Wallie.io');
+        setLoading(false);
+      } catch (err: unknown) {
+        console.error('❌ Error initializing ShogunCore:', err);
+        console.warn('🔄 Continuing without ShogunCore - some features may be limited');
+        
+        // Continue without ShogunCore for basic functionality
+        setShogun(null);
+        setError(null); // Don't show error to user, just continue
+        setLoading(false);
+      }
+    };
+    
+    initializeShogun();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div>🔄 Loading Shogun...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div>❌ Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!shogun) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div>🔄 Initializing Shogun...</div>
+      </div>
+    );
+  }
+
+  const providerOptions = {
+    appName: "Wallie.io",
+    showOauth: true,
+    showWebauthn: true,
+    showMetamask: true,
+    showNostr: true,
+  };
+
+  return (
+    <ShogunButtonProvider 
+      sdk={shogun} 
+      options={providerOptions}
+      onLoginSuccess={(data) => {
+        console.log('Login successful!', data);
+      }}
+      onSignupSuccess={(data) => {
+        console.log('Signup successful!', data);
+      }}
+      onError={(error) => {
+        console.error('Auth error:', error);
+      }}
+    >
+      <AuthBridge shogun={shogun}>
+        {children}
+      </AuthBridge>
+    </ShogunButtonProvider>
+  );
+};
+
+// Hook to use the auth context
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {

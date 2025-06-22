@@ -88,13 +88,18 @@ export const getOrCreateUsernameForPublicKey = async (publicKey: string): Promis
 /**
  * Formats a public key for display (truncated)
  * @param publicKey The public key to format
+ * @param maxLength Optional max length before truncation (default: 20)
  * @returns Formatted public key string
  */
-export const formatPublicKey = (publicKey: string | null): string => {
+export const formatPublicKey = (publicKey: string | null, maxLength: number = 20): string => {
   if (!publicKey) return ''
-  if (publicKey.length <= 12) return publicKey
+  if (publicKey.length <= maxLength) return publicKey
   
-  return `${publicKey.substring(0, 6)}...${publicKey.substring(publicKey.length - 6)}`
+  // For very long keys, show more characters at the beginning and end
+  const startChars = Math.max(6, Math.floor(maxLength * 0.4))
+  const endChars = Math.max(4, Math.floor(maxLength * 0.3))
+  
+  return `${publicKey.substring(0, startChars)}...${publicKey.substring(publicKey.length - endChars)}`
 }
 
 /**
@@ -126,9 +131,13 @@ export const isPublicKey = (userString: string): boolean => {
 export const formatAuthorDisplay = (user: string | null | undefined): string => {
   if (!user) return 'Autore sconosciuto'
   
+  // If it's a public key, try to get the mapped username first
   if (isPublicKey(user)) {
+    // For real-time display, we'll show the formatted public key
+    // The actual username mapping lookup is handled by the AuthContext
     return formatPublicKey(user)
   }
   
+  // If it's already a username, return it as is
   return user
 } 

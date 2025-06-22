@@ -1,4 +1,4 @@
-import GUN from 'gun'
+import Gun from 'gun'
 import 'gun/sea.js' // Importa SEA per funzionalità di signature e crittografia
 
 const peers = ['http://localhost:8765/gun']
@@ -8,7 +8,7 @@ if (window.location.hostname === 'localhost') {
    peers.push('http://localhost:8765/gun')
 }
 
-const gun = GUN({
+const gun = Gun({
    localStorage: false,
    peers,
 })

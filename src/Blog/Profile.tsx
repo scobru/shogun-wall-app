@@ -81,10 +81,11 @@ const Profile = () => {
 
             setMessage({ type: 'success', text: 'Username aggiornato con successo!' })
             
-            // Ricarica la pagina per aggiornare l'AuthContext
-            setTimeout(() => {
-               window.location.reload()
-            }, 1500)
+            // Aggiorna l'username nell'AuthContext senza ricaricare la pagina
+            await auth.refreshUsername()
+            
+            // Reset del form con il nuovo valore
+            setValue('username', '')
 
          } else {
             // Per guest user, aggiorna localStorage
@@ -158,8 +159,8 @@ const Profile = () => {
                {auth.userPub && (
                   <div className="flex justify-between items-center">
                      <span className="font-medium">Public Key:</span>
-                     <span className="font-mono text-sm">
-                        {formatPublicKey(auth.userPub)}
+                     <span className="font-mono text-sm break-all">
+                        {formatPublicKey(auth.userPub, 24)}
                      </span>
                   </div>
                )}

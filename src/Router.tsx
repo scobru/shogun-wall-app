@@ -8,12 +8,13 @@ import {
 } from 'react-router-dom'
 import { ViewNode, NewNode, NodesLanding } from './Nodes'
 import { GetAll } from './List'
-import { NewPost, ViewPost, ViewPostList, BlogWrapper, Profile, UserPosts, UserProfile } from './Blog'
+import { NewPost, ViewPost, ViewPostList, BlogWrapper, Profile, UserProfile } from './Blog'
 import ViewArchive from './Blog/ViewArchive'
 import EditPost from './Blog/EditPost'
 import Dashboard from './Nodes/Dashboard'
 import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './utils/AuthContext'
+import OAuthCallback from './components/OAuthCallback'
 
 function Wrapper() {
    return (
@@ -46,6 +47,7 @@ export default function Router() {
       >
          <AuthProvider>
             <Routes>
+               <Route path="/auth/callback" element={<OAuthCallback />} />
                <Route path="*" element={<Wrapper />}>
                   <Route path="all" element={<GetAll />} />
                   <Route path="archive" element={<ViewArchive />} />
@@ -69,12 +71,14 @@ export default function Router() {
                      <Route path=":username" element={<UserProfile />} />
                   </Route>
                   <Route path="node" element={<NodesLanding />}>
+                     <Route path=":id" element={<ViewNode />} />
+                     <Route path="user/:username" element={<UserProfile />} />
+                  </Route>
+                  <Route path="node" element={<BlogWrapper />}>
                      <Route
                         path="new"
                         element={<NewNodeWithRedirect />}
                      />
-                     <Route path=":id" element={<ViewNode />} />
-                     <Route path="user/:username" element={<UserProfile />} />
                   </Route>
                   <Route path="*" element={<Navigate replace to="/all" />} />
                </Route>

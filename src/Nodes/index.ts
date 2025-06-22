@@ -41,4 +41,14 @@ export type DungeonNode = {
    hashtags?: string // Hashtags del post/nodo
    description?: string // Descrizione del post (per i blog posts)
    image?: string // URL dell'immagine del post
+   
+   // Proprietà per multi-platform support
+   platform?: string // Piattaforma di origine (Reddit, Hacker News, DEV.to, etc.)
+   channel?: string // Canale/subreddit specifico (per Reddit)
+   score?: number // Punteggio/score (per Hacker News)
+   tags?: string // Tags del post (per DEV.to)
+   thumbnail?: string // Thumbnail dell'immagine
+   redditDate?: number // Data originale Reddit
+   hackerNewsDate?: number // Data originale Hacker News  
+   devToDate?: string // Data originale DEV.to
 }

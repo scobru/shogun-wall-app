@@ -30,10 +30,26 @@ const useDelete = (model: string = 'node', archive: boolean = false) => {
                return
             }
             
+            // Debug dettagliato per l'autorizzazione
+            console.log('🔍 [useDelete] Verifica autorizzazione:', {
+               key,
+               currentUserPub,
+               currentUsername,
+               dataUserPub: data.userPub,
+               dataUser: data.user,
+               dataUserType: data.userType
+            })
+            
             // Verifica autorizzazione
             const isAuthorized = 
                (currentUserPub && data.userPub === currentUserPub) || // Utente Shogun
                (currentUsername && data.user === currentUsername && !data.userPub) // Guest locale
+            
+            console.log('🔍 [useDelete] Risultato autorizzazione:', {
+               isAuthorized,
+               check1: currentUserPub && data.userPub === currentUserPub,
+               check2: currentUsername && data.user === currentUsername && !data.userPub
+            })
             
             if (!isAuthorized) {
                console.error('❌ Non autorizzato a cancellare questo post')

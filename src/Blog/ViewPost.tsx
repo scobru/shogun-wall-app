@@ -80,12 +80,11 @@ const ViewPost: React.FC = () => {
    }
 
    // Funzione per cancellare il post
-   const handleDeletePost = () => {
-      if (!post) return
-      const confirmText = `Sei sicuro di voler cancellare il post "${post.title || 'Post senza titolo'}"?\n\nQuesta azione non può essere annullata.`
-      if (window.confirm(confirmText)) {
-         console.log(`🗑️ Cancellazione post: ${key}`)
-         deletePost(key)
+   const handleDelete = () => {
+      if (window.confirm('Sei sicuro di voler eliminare questo post?')) {
+         console.log(`🗑️ Cancellazione post: ${key}` )
+         // Passa i parametri di autenticazione corretti
+         deletePost(key, auth.userPub || undefined, auth.currentUsername || undefined)
          navigate('/blog') // Torna alla lista dei post
       }
    }
@@ -137,7 +136,7 @@ const ViewPost: React.FC = () => {
                   </button>
                   <button 
                      className="btn btn-error btn-sm"
-                     onClick={handleDeletePost}
+                     onClick={handleDelete}
                      title="Cancella post"
                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                   >

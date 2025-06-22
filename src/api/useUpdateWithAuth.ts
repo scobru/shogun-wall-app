@@ -29,7 +29,7 @@ const useUpdateWithAuth = (model: string = 'node') => {
       const enrichedData: any = {
          ...cleanData,
          user: auth.isAuthenticated 
-            ? (auth.userPub || auth.currentUsername || 'shogun_user')
+            ? (auth.currentUsername || auth.username || 'shogun_user')
             : (auth.currentUsername || 'anonymous'),
          userType: auth.isAuthenticated ? 'shogun' : 'guest',
          timestamp: Date.now()

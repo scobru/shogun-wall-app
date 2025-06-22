@@ -6,7 +6,7 @@ import { useAuth } from '../utils/AuthContext';
  * Componente di autenticazione che usa ShogunButton
  */
 export const AuthButton: React.FC = () => {
-  const { isLoggedIn, username, currentUsername, shogun } = useAuth();
+  const { shogun } = useAuth();
 
   // Se shogun non è ancora inizializzato, mostra un loading
   if (!shogun) {

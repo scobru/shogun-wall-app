@@ -8,6 +8,34 @@
   </head>
   <body>
     <div id="root"></div>
+    
+    <!-- Prevent MetaMask provider conflicts -->
+    <script>
+      // Store reference to existing ethereum provider if it exists
+      if (typeof window.ethereum !== 'undefined') {
+        window._originalEthereum = window.ethereum;
+        
+        // Create a descriptor to prevent read-only errors
+        try {
+          Object.defineProperty(window, 'ethereum', {
+            get: function() {
+              return window._originalEthereum;
+            },
+            set: function(value) {
+              if (!window._originalEthereum) {
+                window._originalEthereum = value;
+              }
+              return window._originalEthereum;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          console.warn('Could not redefine ethereum property:', e);
+        }
+      }
+    </script>
+    
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html> 

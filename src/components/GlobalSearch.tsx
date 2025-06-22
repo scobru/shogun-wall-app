@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import gun, { namespace } from '../api/gun';
 
@@ -90,10 +90,7 @@ const SearchInput = styled.input`
   }
 `;
 
-const SearchIcon = styled.span`
-  font-size: 16px;
-  color: var(--gray-500);
-`;
+
 
 const SearchResults = styled.div`
   max-height: 300px;

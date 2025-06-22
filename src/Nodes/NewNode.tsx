@@ -155,63 +155,90 @@ const NewNode = (props: NewSubNodeProps) => {
             />
          </FormItem>
          
-         {/* URL per og-link */}
-         <FormItem className={errors['url'] ? 'error' : ''}>
-            <Label>URL (og-link):</Label>
-            <Input
-               {...register('url')}
-               onKeyPress={handleUserKeyPress}
-               placeholder="https://example.com"
-            />
-            <div style={{ 
-               marginTop: '4px', 
-               fontSize: '12px', 
-               color: '#6c757d',
-               padding: '4px'
-            }}>
-               Inserisci un URL esterno da mostrare come og-link
-            </div>
-         </FormItem>
+         {/* Campi avanzati - nascosti per i commenti */}
+         {!props.head && (
+            <>
+               {/* URL per og-link */}
+               <FormItem className={errors['url'] ? 'error' : ''}>
+                  <Label>URL (og-link):</Label>
+                  <Input
+                     {...register('url')}
+                     onKeyPress={handleUserKeyPress}
+                     placeholder="https://example.com"
+                  />
+                  <div style={{ 
+                     marginTop: '4px', 
+                     fontSize: '12px', 
+                     color: '#6c757d',
+                     padding: '4px'
+                  }}>
+                     Inserisci un URL esterno da mostrare come og-link
+                  </div>
+               </FormItem>
 
-         {/* Categoria */}
-         <FormItem className={errors['category'] ? 'error' : ''}>
-            <Label>Categoria:</Label>
-            <Input
-               {...register('category')}
-               onKeyPress={handleUserKeyPress}
-               placeholder="es. Tech, Ideas, Discussion"
-            />
-            <div style={{ 
-               marginTop: '4px', 
-               fontSize: '12px', 
-               color: '#6c757d',
-               padding: '4px'
-            }}>
-               Categoria principale del nodo (opzionale)
-            </div>
-         </FormItem>
+               {/* Categoria */}
+               <FormItem className={errors['category'] ? 'error' : ''}>
+                  <Label>Categoria:</Label>
+                  <Input
+                     {...register('category')}
+                     onKeyPress={handleUserKeyPress}
+                     placeholder="es. Tech, Ideas, Discussion"
+                  />
+                  <div style={{ 
+                     marginTop: '4px', 
+                     fontSize: '12px', 
+                     color: '#6c757d',
+                     padding: '4px'
+                  }}>
+                     Categoria principale del nodo (opzionale)
+                  </div>
+               </FormItem>
 
-         {/* Hashtags */}
-         <FormItem className={errors['hashtags'] ? 'error' : ''}>
-            <Label>Hashtags:</Label>
-            <Input
-               {...register('hashtags')}
-               onKeyPress={handleUserKeyPress}
-               placeholder="#idea #discussion #brainstorm"
-            />
-            <div style={{ 
-               marginTop: '4px', 
-               fontSize: '12px', 
-               color: '#6c757d',
-               padding: '4px'
-            }}>
-               Hashtags separati da spazi (es: #idea #tech #discussion)
-            </div>
-         </FormItem>
+               {/* Hashtags */}
+               <FormItem className={errors['hashtags'] ? 'error' : ''}>
+                  <Label>Hashtags:</Label>
+                  <Input
+                     {...register('hashtags')}
+                     onKeyPress={handleUserKeyPress}
+                     placeholder="#idea #discussion #brainstorm"
+                  />
+                  <div style={{ 
+                     marginTop: '4px', 
+                     fontSize: '12px', 
+                     color: '#6c757d',
+                     padding: '4px'
+                  }}>
+                     Hashtags separati da spazi (es: #idea #tech #discussion)
+                  </div>
+               </FormItem>
+            </>
+         )}
+
+         {/* Per i commenti, mostra solo URL opzionale */}
+         {props.head && (
+            <FormItem className={errors['url'] ? 'error' : ''}>
+               <details style={{ marginBottom: '8px' }}>
+                  <summary style={{ 
+                     cursor: 'pointer', 
+                     fontSize: '12px', 
+                     color: '#6c757d',
+                     marginBottom: '8px'
+                  }}>
+                     🔗 Aggiungi link (opzionale)
+                  </summary>
+                  <Input
+                     {...register('url')}
+                     onKeyPress={handleUserKeyPress}
+                     placeholder="https://example.com"
+                     style={{ marginTop: '8px' }}
+                  />
+               </details>
+            </FormItem>
+         )}
          
-         {/*  ID */}
+         {/*  ID - nascosto per i commenti */}
          <FormItem
-            hidden={showAdvanced}
+            hidden={!!(showAdvanced || props.head)}
             className={errors['id'] ? 'error' : ''}
          >
             <Input
@@ -228,10 +255,10 @@ const NewNode = (props: NewSubNodeProps) => {
                placeholder={getRandomFromArray(['Previous', 'Parent'])}
             />
          </FormItem>
-         {/* User */}
+         {/* User - nascosto per i commenti se autenticato */}
          <FormItem 
             className={errors['user'] ? 'error' : ''}
-            hidden={auth.isAuthenticated} // Nascondi se autenticato
+            hidden={!!(auth.isAuthenticated || props.head)} // Nascondi se autenticato O se è un commento
          >
             <Input
                {...register('user')}
@@ -265,7 +292,12 @@ const NewNode = (props: NewSubNodeProps) => {
                disabled={loading || errors.length}
                onClick={handleSubmit(createNodeWithDebug as SubmitHandler<FieldValues>)}
             >
-               {getRandomFromArray(['Add', 'Create'])}
+               {loading 
+                  ? 'Invio...' 
+                  : props.head 
+                     ? 'Pubblica Commento' 
+                     : getRandomFromArray(['Add', 'Create'])
+               }
             </Button>
          </FormItem>
       </Wrapper>

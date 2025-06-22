@@ -29,9 +29,10 @@ const ViewPostList = memo(() => {
 
    const handleDeletePost = useCallback((key: string) => {
       if (window.confirm('Sei sicuro di voler eliminare questo post?')) {
-         deletePost(key)
+         // Passa i parametri di autenticazione corretti
+         deletePost(key, auth.userPub || undefined, auth.currentUsername || undefined)
       }
-   }, [deletePost])
+   }, [deletePost, auth.userPub, auth.currentUsername])
 
    const handlePostClick = useCallback((key: string | undefined) => {
       if (!key) return

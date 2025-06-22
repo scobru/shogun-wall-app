@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import useDelete from '../api/useDelete'
+import { useAuth } from '../utils/AuthContext'
 
 const usePostClicked = () => {
    const [deleteNode] = useDelete('post', true)
    const navigate = useNavigate()
+   const auth = useAuth()
 
    const postClicked = (key: string | undefined, { metaKey, altKey }) => {
       if (!key) {
@@ -13,7 +15,8 @@ const usePostClicked = () => {
          const confirmationText =
             'Are you sure you would like to delete this post?'
          if (window.confirm(confirmationText) === true) {
-            deleteNode(key)
+            // Passa i parametri di autenticazione corretti
+            deleteNode(key, auth.userPub || undefined, auth.currentUsername || undefined)
          }
          return
       }
