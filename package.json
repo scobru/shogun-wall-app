@@ -40,7 +40,8 @@
       "react-router": "^6.6.2",
       "react-router-dom": "^6.6.2",
       "react-scripts": "5.0.1",
-      "shogun-core": "file:../shogun-core",
+      "shogun-core": "latest",
+      "shogun-button-react": "latest",
       "styled-components": "^5.3.6",
       "typescript": "^4.9.4",
       "web-vitals": "^3.1.1"

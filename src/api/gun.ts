@@ -1,16 +1,24 @@
 import Gun from 'gun'
 import 'gun/sea.js' // Importa SEA per funzionalità di signature e crittografia
 
-const peers = ['http://localhost:8765/gun']
+const peers = ['https://ruling-mastodon-improved.ngrok-free.app/gun']
 
 if (window.location.hostname === 'localhost') {
    // peers.push('http://192.168.1.7:8765/gun')
-   peers.push('http://localhost:8765/gun')
+   peers.push('https://ruling-mastodon-improved.ngrok-free.app/gun')
 }
 
 const gun = Gun({
    localStorage: false,
+   radisk:false,
    peers,
+   headers:{
+      token: "shogun2025",
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      Authorization: `Bearer shogun2025`
+   },
+   token: "shogun2025"
 })
 
 export default gun
