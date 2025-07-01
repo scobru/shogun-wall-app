@@ -96,8 +96,8 @@ export const TipTapStyled = styled.div`
       }
 
       pre {
-         background: var(--gray-900);
-         color: var(--gray-100);
+         background: var(--background-secondary);
+         color: var(--text-primary);
          font-family: var(--font-mono);
          padding: var(--space-4);
          border-radius: var(--radius-lg);

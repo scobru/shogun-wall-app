@@ -24,7 +24,7 @@ export type SimpleIconProps = {
 
 export const stylesColors = {
     [Styles.default]: 'inherit',
-    [Styles.warning]: 'red',
-    [Styles.info]: 'yellow',
-    [Styles.positive]: 'green',
+    [Styles.warning]: 'var(--error-500)',
+    [Styles.info]: 'var(--primary-500)',
+    [Styles.positive]: 'var(--success-500)',
 }

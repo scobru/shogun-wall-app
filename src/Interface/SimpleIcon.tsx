@@ -2,8 +2,6 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { Styles, SimpleIconProps, stylesColors } from './'
 
-const ITEM_BORDER = 'dashed #666600 thin'
-
 const getColorFromStyle = (
     style: Styles = Styles.default,
     hovered: Boolean
@@ -22,7 +20,7 @@ const StyledSimpleIcon = styled.div<{
     display: flex;
     cursor: pointer;
     color: ${({ style, hovered }) => getColorFromStyle(style, hovered)};
-    border: ${({ showBorder }) => (showBorder ? ITEM_BORDER : '')};
+    border: ${({ showBorder }) => (showBorder ? '1px solid var(--border)' : 'none')};
     padding: 0rem 0rem 0rem 0rem;
     user-select: none;
     width: 3rem;

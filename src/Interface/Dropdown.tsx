@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
 
 type ILink = {
    path: string
@@ -12,40 +11,6 @@ type DropdownProps = {
    children: React.ReactChild
 }
 
-export const DropDownStyled = styled.div`
-   padding: 6px 5px 8px 20px;
-   position: relative;
-   .top a {
-      cursor: pointer;
-   }
-   a {
-      user-select: none;
-      white-space: nowrap;
-      display: flex;
-      min-width: 20px;
-      color: black;
-      text-decoration: none;
-   }
-   a:hover {
-      color: black;
-   }
-   .dropdown {
-      position: absolute;
-      z-index: 3;
-      display: flex;
-      flex-direction: column;
-      min-width: 100px;
-      margin: 4px 0px 0px 0px;
-      padding: 1px 20px 17px 20px;
-      border-radius: 5px;
-      background-color: white;
-      box-shadow: rgba(0, 0, 0, 0.16) 0px 10px 36px 0px,
-         rgba(0, 0, 0, 0.06) 0px 0px 0px 1px;
-      a {
-         margin: 10px 0 0 0;
-      }
-   }
-`
 export const DropDown = ({ links, children }: DropdownProps) => {
    const [open, setOpen] = useState(false)
    const navigate = useNavigate()
@@ -75,27 +40,51 @@ export const DropDown = ({ links, children }: DropdownProps) => {
    }
 
    return (
-      <DropDownStyled
+      <div
          ref={ref}
-         // onMouseEnter={() => setOpen(true)}
-         // onMouseLeave={() => setOpen(false)}
+         className="dropdown-container"
+         style={{ position: 'relative' }}
       >
          <div className="top">
-            <a onClick={topClicked} onDoubleClick={topDoubleClicked}>
+            <a 
+               onClick={topClicked} 
+               onDoubleClick={topDoubleClicked}
+               style={{
+                  userSelect: 'none',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  minWidth: '20px',
+                  color: 'var(--text-primary)',
+                  textDecoration: 'none',
+                  cursor: 'pointer'
+               }}
+            >
                {children}
             </a>
          </div>
          {open && (
-            <div className="dropdown">
+            <div className="dropdown-menu" style={{
+               position: 'absolute',
+               zIndex: 3,
+               display: 'flex',
+               flexDirection: 'column',
+               minWidth: '120px',
+               marginTop: 'var(--space-2)',
+               padding: 'var(--space-2)',
+               borderRadius: 'var(--radius-lg)',
+               backgroundColor: 'var(--surface)',
+               boxShadow: 'var(--shadow-lg)',
+               border: '1px solid var(--border)'
+            }}>
                {links.map(({ path, text }, index) => {
                   return (
-                     <Link key={index} to={path}>
+                     <Link key={index} to={path} className="dropdown-item">
                         {text}
                      </Link>
                   )
                })}
             </div>
          )}
-      </DropDownStyled>
+      </div>
    )
 }

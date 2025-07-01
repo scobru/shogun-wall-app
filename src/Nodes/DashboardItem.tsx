@@ -1,4 +1,5 @@
-import styled from 'styled-components/macro'
+//import styled from 'styled-components/macro'
+import styled from 'styled-components'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { SimpleIcon, Styles } from '../Interface'
