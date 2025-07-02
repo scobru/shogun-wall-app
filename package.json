@@ -22,10 +22,13 @@
       "@vercel/analytics": "^1.0.1",
       "crypto-js": "^4.1.1",
       "dompurify": "^2.4.3",
+      "dotenv": "^17.0.1",
       "gun": "^0.2020.1235",
       "lodash": "^4.17.21",
       "magick-wasm": "^0.0.3",
       "moment": "^2.29.4",
+      "os-browserify": "^0.3.0",
+      "path-browserify": "^1.0.1",
       "prosemirror-commands": "^1.5.0",
       "prosemirror-dropcursor": "^1.6.1",
       "prosemirror-gapcursor": "^1.3.1",
@@ -44,6 +47,7 @@
       "shogun-core": "^1.3.6",
       "styled-components": "^5.3.6",
       "typescript": "^4.9.4",
+      "vercel": "^44.2.8",
       "web-vitals": "^3.1.1"
    },
    "scripts": {

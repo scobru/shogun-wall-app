@@ -1,10 +1,6 @@
-# HAL 9000 - Heuristically Programmed Algorithmic Computer
+# Shogun-Wall
 
 <img width="200" src="https://user-images.githubusercontent.com/87884985/172069592-8a4de3db-7f2f-4dfd-b523-29aae3a7e950.png" />
-
-## 🚀 Overview
-
-HAL 9000 is a **distributed social intelligence system** inspired by the iconic AI from *2001: A Space Odyssey*. It combines advanced distributed computing with social interaction capabilities, creating a decentralized platform for content sharing, discussion, and collaboration.
 
 This project is based on https://github.com/wayjake/Wallie.io/
 
@@ -24,24 +20,28 @@ This project is based on https://github.com/wayjake/Wallie.io/
 ### Core Components
 
 #### 1. **Authentication System** (`shogun-button-react`)
+
 - **Shogun-core Integration**: Decentralized identity management
 - **Multi-method Authentication**: Password, Web3, WebAuthn, Nostr, OAuth
 - **Pair Export/Import**: Secure key backup and recovery system
 - **Guest Mode**: Local username support for anonymous users
 
-#### 2. **Content Management** (`HAL9000`)
+#### 2. **Content Management** (`Shogun-Wall`)
+
 - **Dual Content Model**: Blog posts (structured) and Nodes (flexible)
 - **Real-time Synchronization**: Gun.js-powered live updates
 - **Multi-platform Aggregation**: Automated content from external sources
 - **Rich Text Editor**: TipTap-based WYSIWYG editor
 
 #### 3. **Social Features**
+
 - **Voting System**: Upvote/downvote with intelligent ranking
 - **Comment Threads**: Nested discussions on posts and nodes
 - **User Profiles**: Comprehensive user pages with content history
 - **Real-time Notifications**: Live updates and interactions
 
 #### 4. **Data Layer**
+
 - **Gun.js Database**: Decentralized, real-time database
 - **Conflict Resolution**: Automatic data synchronization
 - **Offline Support**: Works without internet connection
@@ -50,6 +50,7 @@ This project is based on https://github.com/wayjake/Wallie.io/
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **React 18**: Modern React with hooks and functional components
 - **TypeScript**: Type-safe development
 - **Styled Components**: CSS-in-JS styling
@@ -58,11 +59,13 @@ This project is based on https://github.com/wayjake/Wallie.io/
 - **DOMPurify**: XSS protection
 
 ### Backend/Database
+
 - **Gun.js**: Decentralized database and networking
 - **Gun SEA**: Cryptographic security layer
 - **P2P Networking**: Distributed data synchronization
 
 ### Authentication
+
 - **Shogun-core**: Decentralized identity system
 - **Web3**: Blockchain wallet integration
 - **WebAuthn**: Biometric authentication
@@ -70,6 +73,7 @@ This project is based on https://github.com/wayjake/Wallie.io/
 - **OAuth**: Traditional social login
 
 ### External Integrations
+
 - **Reddit API**: Content aggregation
 - **Hacker News API**: Tech news integration
 - **DEV.to API**: Developer content
@@ -77,7 +81,8 @@ This project is based on https://github.com/wayjake/Wallie.io/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 16+ 
+
+- Node.js 16+
 - npm or yarn
 - Modern web browser
 
@@ -85,28 +90,22 @@ This project is based on https://github.com/wayjake/Wallie.io/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/hal-9000.git
-cd hal-9000
-
-# Install dependencies for main app
-cd HAL9000
-npm install
+git clone https://github.com/your-org/shogun-wall-app.git
+cd shogun-wall-app
 
 # Install dependencies for auth component
-cd ../shogun-button-react
 npm install
 
 # Build auth component
 npm run build
 
 # Return to main app and start development server
-cd ../HAL9000
 npm start
 ```
 
 ### Environment Setup
 
-Create a `.env` file in `HAL9000/`:
+Create a `.env` file in `Shogun-Wall/`:
 
 ```env
 REACT_APP_GUN_PEERS=["https://gun-manhattan.herokuapp.com/gun"]
@@ -118,8 +117,8 @@ REACT_APP_REDDIT_CLIENT_ID=your_reddit_client_id
 
 ### Getting Started
 
-1. **Visit the Application**: Navigate to the HAL 9000 interface
-2. **Choose Authentication**: 
+1. **Visit the Application**: Navigate to the Shogun-Wall interface
+2. **Choose Authentication**:
    - **Guest Mode**: Set a local username
    - **Shogun Login**: Use decentralized identity
    - **Web3**: Connect crypto wallet
@@ -131,12 +130,14 @@ REACT_APP_REDDIT_CLIENT_ID=your_reddit_client_id
 ### Content Types
 
 #### Blog Posts
+
 - **Structured Articles**: Title, content, tags, categories
 - **Rich Formatting**: HTML/Markdown support
 - **SEO Optimized**: Meta descriptions and social sharing
 - **Edit History**: Version tracking and collaboration
 
 #### Nodes
+
 - **Flexible Format**: Any type of content or data
 - **Directional Linking**: Connect related nodes
 - **Real-time Editing**: Live collaborative editing
@@ -145,11 +146,13 @@ REACT_APP_REDDIT_CLIENT_ID=your_reddit_client_id
 ### Voting System
 
 #### Sorting Algorithms
+
 - **🔥 Hot**: Trending content based on engagement and recency
 - **⭐ Top**: Highest voted content of all time
 - **🆕 New**: Most recently posted content
 
 #### Voting Mechanics
+
 - **Upvote (⇧)**: Positive engagement, increases visibility
 - **Downvote (⇩)**: Negative feedback, decreases ranking
 - **Score Calculation**: `upvotes - downvotes`
@@ -158,12 +161,14 @@ REACT_APP_REDDIT_CLIENT_ID=your_reddit_client_id
 ### Key Management
 
 #### Export Gun Pair
+
 1. Go to **Profile** → **Gestione Pair Gun**
 2. Enter encryption password (recommended)
 3. Click **Export Pair**
 4. Save the generated JSON securely
 
 #### Import Gun Pair
+
 1. Click **Import Gun Pair** in login options
 2. Paste your pair JSON data
 3. Enter decryption password if encrypted
@@ -175,7 +180,7 @@ REACT_APP_REDDIT_CLIENT_ID=your_reddit_client_id
 
 ```
 hal-9000/
-├── HAL9000/                 # Main application
+├── Shogun-Wall/                 # Main application
 │   ├── src/
 │   │   ├── api/              # Gun.js integration
 │   │   ├── Blog/             # Blog functionality
@@ -195,37 +200,42 @@ hal-9000/
 ### Key APIs
 
 #### Authentication
-```typescript
-import { useShogun } from 'shogun-button-react';
 
-const { login, logout, isLoggedIn, exportGunPair, importGunPair } = useShogun();
+```typescript
+import { useShogun } from 'shogun-button-react'
+
+const { login, logout, isLoggedIn, exportGunPair, importGunPair } = useShogun()
 
 // Login with pair
-await login('pair', pairData);
+await login('pair', pairData)
 
 // Export encrypted pair
-const encryptedPair = await exportGunPair('password');
+const encryptedPair = await exportGunPair('password')
 ```
 
 #### Content Management
+
 ```typescript
-import gun from './api/gun';
+import gun from './api/gun'
 
 // Create a node
-gun.get('namespace/node').get(nodeId).put(nodeData);
+gun.get('namespace/node').get(nodeId).put(nodeData)
 
 // Listen to changes
-gun.get('namespace/node').map().on((data, key) => {
-  console.log('New node:', data);
-});
+gun.get('namespace/node')
+   .map()
+   .on((data, key) => {
+      console.log('New node:', data)
+   })
 ```
 
 #### Voting System
+
 ```typescript
 const upVote = (node) => {
-  const upVotes = (node?.upVotes || 0) + 1;
-  gun.get('namespace/node').get(node.key).put({ upVotes });
-};
+   const upVotes = (node?.upVotes || 0) + 1
+   gun.get('namespace/node').get(node.key).put({ upVotes })
+}
 ```
 
 ### Adding New Features
@@ -243,27 +253,31 @@ The system automatically fetches content from external platforms:
 ```typescript
 // Reddit Integration
 const fetchRedditPosts = async () => {
-  const channels = ['CrazyIdeas', 'AskReddit', 'todayilearned'];
-  const response = await fetch(`https://www.reddit.com/r/${channel}/new.json`);
-  // Process and store content
-};
+   const channels = ['CrazyIdeas', 'AskReddit', 'todayilearned']
+   const response = await fetch(`https://www.reddit.com/r/${channel}/new.json`)
+   // Process and store content
+}
 
 // Hacker News Integration
 const fetchHackerNews = async () => {
-  const topStories = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
-  // Fetch story details and store
-};
+   const topStories = await fetch(
+      'https://hacker-news.firebaseio.com/v0/topstories.json'
+   )
+   // Fetch story details and store
+}
 ```
 
 ## 🔒 Security
 
 ### Data Protection
+
 - **Encryption**: Gun SEA for cryptographic security
 - **XSS Prevention**: DOMPurify sanitization
 - **Input Validation**: Server and client-side validation
 - **Key Management**: Secure pair export/import
 
 ### Privacy
+
 - **Decentralized**: No central data collection
 - **Guest Mode**: Anonymous participation
 - **Local Storage**: Sensitive data kept locally
@@ -302,12 +316,14 @@ npm run test:e2e
 ## 📊 Performance
 
 ### Optimization Features
+
 - **Code Splitting**: Lazy loading of components
 - **Bundle Analysis**: Webpack bundle optimization
 - **Caching**: Intelligent data caching
 - **Real-time Updates**: Efficient data synchronization
 
 ### Monitoring
+
 - **View Tracking**: Content engagement metrics
 - **Performance Metrics**: Load times and responsiveness
 - **Error Tracking**: Comprehensive error logging
@@ -315,6 +331,7 @@ npm run test:e2e
 ## 🔮 Roadmap
 
 ### Planned Features
+
 - **Mobile App**: React Native implementation
 - **Plugin System**: Extensible architecture
 - **Advanced Analytics**: Detailed engagement metrics
@@ -322,13 +339,14 @@ npm run test:e2e
 - **Blockchain Integration**: Token-based incentives
 
 ### Current Priorities
+
 1. **Mobile Optimization**: Responsive design improvements
 2. **Performance**: Bundle size optimization
 3. **Documentation**: Comprehensive API documentation
 4. **Testing**: Increased test coverage
 
-
 ### Community
+
 - **GitHub Discussions**: [Project Discussions](https://github.com/your-org/hal-9000/discussions)
 
 ## 📄 License
@@ -337,13 +355,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Stanley Kubrick** - Original HAL 9000 inspiration
+- **Stanley Kubrick** - Original Shogun-Wall inspiration
 - **Gun.js Team** - Decentralized database technology
 - **React Community** - Frontend framework and ecosystem
 - **Open Source Contributors** - Community contributions and feedback
 
 ---
 
-**"I'm sorry, Dave. I'm afraid I can't do that."** - HAL 9000
+**"I'm sorry, Dave. I'm afraid I can't do that."** - Shogun-Wall
 
-*Built with ❤️ for the decentralized future*
+_Built with ❤️ for the decentralized future_

@@ -552,10 +552,8 @@ const GetAll = () => {
                }}>
                   <div className="sorting-buttons" style={{
                      display: 'flex',
-                     background: '#f8f9fa',
                      borderRadius: '6px',
                      padding: '2px',
-                     border: '1px solid #e9ecef',
                      fontSize: '12px'
                   }}>
                      {[

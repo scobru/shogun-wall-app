@@ -1,21 +1,23 @@
 import { ShogunCore, Gun, SEA } from 'shogun-core'
-import './gun-put-headers' // Importa SEA per funzionalità di signature e crittografia
+import { setToken, getToken } from './gun-put-headers' // Importa SEA per funzionalità di signature e crittografia
 
-const peers = ['wss://ruling-mastodon-improved.ngrok-free.app/gun']
+const peers = ['wss://ruling-mastodon-improved.ngrok-free.app/gun','wss://peer.wallie.io/gun','wss://gun-manhattan.herokuapp.com/gun']
 
-if (window.location.hostname === 'localhost') {
-   // peers.push('http://192.168.1.7:8765/gun')
-   peers.push('wss://ruling-mastodon-improved.ngrok-free.app/gun')
-}
+// if (window.location.hostname === 'localhost') {
+//    peers.push('http://192.168.1.7:8765/gun')
+// }
+
+
+setToken('S3RVER')
+getToken()
 
 const shogunCore = new ShogunCore({
    scope: 'hal9000',
    peers,
 })
 
-console.log(shogunCore)
-
 const gun = shogunCore.gun
+
 
 // const gun = Gun({
 //    peers,

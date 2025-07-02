@@ -1,40 +1,45 @@
-import Gun from 'gun'
+import Gun from 'gun';
+
+// Type definitions
+interface TokenState {
+    value: string | undefined;
+}
+
+interface Message {
+    headers?: Record<string, any>;
+    [key: string]: any;
+}
+
+interface GunContext {
+    once?: boolean;
+    on: (event: string, callback: Function) => void;
+}
+
+interface GunMiddleware {
+    to: {
+        next: (msg: Message) => void;
+    };
+}
 
 // Functional programming style implementation
-//ts-docs
-/**
- * @param {Gun} Gun
- * @returns {Object}
- */
-const gunHeaderModule = (Gun) => {
+const gunHeaderModule = (Gun: any) => {
     // Closure for token state
-    const tokenState = {
+    const tokenState: TokenState = {
         value: undefined
     };
 
     // Pure function to create a new token state
-    /**
-     * @param {string} newToken
-     * @returns {string}
-     */
-    const setToken = (newToken) => {
+    const setToken = (newToken: string): string => {
         tokenState.value = newToken;
-        setupTokenMiddleware()
+        setupTokenMiddleware();
         return tokenState.value;
     };
 
     // Pure function to retrieve token
-    /**
-     * @returns {string}
-     */
-    const getToken = () => tokenState.value;
+    const getToken = (): string | undefined => tokenState.value;
 
     // Function to add token to headers
-    /**
-     * @param {Object} msg
-     * @returns {Object}
-     */
-    const addTokenToHeaders = (msg) => ({
+    const addTokenToHeaders = (msg: Message): Message => ({
         ...msg,
         headers: {
             ...msg.headers,
@@ -43,14 +48,11 @@ const gunHeaderModule = (Gun) => {
     });
 
     // Setup middleware
-    /**
-     * @returns {void}
-     */
-    const setupTokenMiddleware = () => {
-        Gun.on("opt", function(ctx) {
+    const setupTokenMiddleware = (): void => {
+        Gun.on("opt", function(this: any, ctx: GunContext) {
             if (ctx.once) return;
             
-            ctx.on("out", function(msg) {
+            ctx.on("out", function(this: GunMiddleware, msg: Message) {
                 const to = this.to;
                 // Apply pure function to add headers
                 const msgWithHeaders = addTokenToHeaders(msg);
@@ -73,6 +75,8 @@ const gunHeaderModule = (Gun) => {
 // Execute the module with Gun
 export const { setToken, getToken } = gunHeaderModule(Gun);
 
-// Export the functions
-window.setToken = setToken;
-window.getToken = getToken;
+// Export the functions to global window (if in browser environment)
+if (typeof window !== 'undefined') {
+    (window as any).setToken = setToken;
+    (window as any).getToken = getToken;
+}

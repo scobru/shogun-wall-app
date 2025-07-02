@@ -6,6 +6,10 @@ import gun from '../api/gun';
 import { getStoredUsernameForPublicKey, formatPublicKey } from './usernameMap';
 import 'gun/sea.js';
 
+
+import dotenv from 'dotenv';
+dotenv.config();
+
 // Define the shape of our auth context
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -99,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const initializeShogun = async () => {
       try {
-        console.log('🚀 Initializing ShogunCore for Wallie.io...');
+        console.log('🚀 Initializing ShogunCore for Shogun-Wall...');
         
         // Wait a bit for Gun to be fully initialized
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -117,10 +121,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             rpName: "HAL9000" 
           },
           nostr: { enabled: true },
+          oauth: {
+            enabled: true,
+            providers: {
+              google: {
+                clientId:
+                  process.env.REACT_APP_GOOGLE_CLIENT_ID,
+                clientSecret: process.env.REACT_APP_GOOGLE_CLIENT_SECRET,
+                redirectUri: process.env.REACT_APP_GOOGLE_REDIRECT_URI,
+                scope: ["openid", "email", "profile"],
+                authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+                tokenUrl: "https://oauth2.googleapis.com/token",
+                userInfoUrl: "https://www.googleapis.com/oauth2/v2/userinfo",
+              },
+            },
+          },
+          scope: "shogun-wall",
+          peers: ["wss://ruling-mastodon-improved.ngrok-free.app/gun","wss://peer.Shogun-Wall/gun","wss://gun-manhattan.herokuapp.com/gun"],
+          logging: {
+            enabled: true,
+            level : "info",
+          }
         });
         
         setShogun(shogunCore);
-        console.log('✅ ShogunCore initialized for Wallie.io');
+        console.log('✅ ShogunCore initialized for Shogun-Wall');
         setLoading(false);
       } catch (err: unknown) {
         console.error('❌ Error initializing ShogunCore:', err);
@@ -161,7 +186,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   const providerOptions = {
-    appName: "Wallie.io",
+    appName: "Shogun-Wall",
     showOauth: true,
     showWebauthn: true,
     showMetamask: true,
