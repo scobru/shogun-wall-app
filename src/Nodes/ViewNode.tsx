@@ -12,6 +12,8 @@ import {
    MessageTop,
    MessageWrapper,
    Username,
+   VoteText,
+   VoteContainer,
 } from './ViewNode.styled'
 import LoadingWheel from '../Interface/LoadingWheel'
 import useKeyboard from '../utils/useKeyboard'
@@ -366,6 +368,31 @@ const ViewNode = () => {
             )}
 
             {!node?.message && !node?.directionText && <LoadingWheel />}
+
+            {/* Vote buttons */}
+            <VoteContainer>
+               <VoteText 
+                  className={`upvote ${node?.userVote === 'up' ? 'voted' : ''}`}
+                  onClick={(e) => {
+                     e.preventDefault()
+                     // Implementare la logica di upvote
+                  }}
+               >
+                  <span className="vote-icon">↑</span>
+                  <span className="vote-count">{node?.upVotes || 0}</span>
+               </VoteText>
+
+               <VoteText 
+                  className={`downvote ${node?.userVote === 'down' ? 'voted' : ''}`}
+                  onClick={(e) => {
+                     e.preventDefault()
+                     // Implementare la logica di downvote
+                  }}
+               >
+                  <span className="vote-icon">↓</span>
+                  <span className="vote-count">{node?.downVotes || 0}</span>
+               </VoteText>
+            </VoteContainer>
          </MessageWrapper>
 
          {/* Sezione commenti */}

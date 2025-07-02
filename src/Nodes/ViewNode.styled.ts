@@ -58,6 +58,7 @@ export const MessageWrapper = styled.div`
    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
    margin-bottom: 24px;
    box-sizing: border-box;
+   color: var(--text-color);
 `
 
 export const MessageTop = styled.div`
@@ -66,6 +67,8 @@ export const MessageTop = styled.div`
    justify-content: space-between;
    align-items: flex-start;
    margin-bottom: 16px;
+   padding-bottom: 12px;
+   border-bottom: 1px solid var(--gray-200);
    flex-wrap: wrap;
    gap: 12px;
    box-sizing: border-box;
@@ -97,6 +100,7 @@ export const Username = styled.div`
 export const MessageDate = styled.div`
    color: var(--gray-600);
    font-size: 13px;
+   font-weight: 500;
    font-style: italic;
    line-height: 1.4;
    box-sizing: border-box;
@@ -111,6 +115,7 @@ export const Message = styled.div`
    a {
       color: var(--primary-600);
       text-decoration: none;
+      font-weight: 500;
       
       &:hover {
          text-decoration: underline;
@@ -139,6 +144,7 @@ export const Message = styled.div`
       border-left: 4px solid var(--primary-200);
       background-color: var(--gray-50);
       font-style: italic;
+      color: var(--gray-700);
    }
    
    code {
@@ -147,6 +153,7 @@ export const Message = styled.div`
       border-radius: 4px;
       font-family: 'Monaco', 'Consolas', monospace;
       font-size: 14px;
+      color: var(--text-color);
    }
    
    pre {
@@ -155,11 +162,31 @@ export const Message = styled.div`
       border-radius: 8px;
       overflow-x: auto;
       margin: 12px 0;
+      border: 1px solid var(--gray-200);
       
       code {
          background: none;
          padding: 0;
       }
+   }
+
+   ul, ol {
+      margin: 12px 0;
+      padding-left: 24px;
+      
+      li {
+         margin-bottom: 6px;
+         color: var(--text-color);
+      }
+   }
+
+   strong, b {
+      font-weight: 600;
+      color: var(--text-color);
+   }
+
+   em, i {
+      color: var(--text-color);
    }
 `
 
@@ -168,4 +195,61 @@ export const NewNodeWrapper = styled.div`
    padding-top: 24px;
    border-top: 1px solid var(--gray-200);
    box-sizing: border-box;
+`
+
+export const VoteText = styled.span`
+   display: inline-flex;
+   align-items: center;
+   gap: 4px;
+   cursor: pointer;
+   font-size: 13px;
+   font-weight: 500;
+   color: var(--gray-600);
+   transition: all 0.15s ease;
+   user-select: none;
+
+   &.upvote {
+      &:hover {
+         color: var(--success-600);
+      }
+      
+      &.voted {
+         color: var(--success-600);
+         font-weight: 600;
+      }
+   }
+
+   &.downvote {
+      &:hover {
+         color: var(--error-600);
+      }
+      
+      &.voted {
+         color: var(--error-600);
+         font-weight: 600;
+      }
+   }
+
+   .vote-icon {
+      font-size: 11px;
+   }
+
+   .vote-count {
+      min-width: 16px;
+      text-align: center;
+   }
+
+   &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+   }
+`
+
+export const VoteContainer = styled.div`
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   padding: 4px 8px;
+   border-radius: 6px;
+   background: var(--gray-50);
 ` 

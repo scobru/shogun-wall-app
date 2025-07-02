@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import gun, { namespace } from '../api/gun'
-import { Username } from './ViewNode.styled'
+import { Username, VoteText, VoteContainer } from './ViewNode.styled'
 import { GunId } from '.'
 import { useState, useEffect } from 'react'
 import OGLinkPreview from '../components/OGLinkPreview'
@@ -263,9 +263,31 @@ const NodeRow = ({ directionKey, directions, pruneRight }: NodeRowProps) => {
                   )}
                   
                   <div className="comment-actions">
-                     <span className="view-full-link">
-                        Visualizza commento completo →
-                     </span>
+                     <VoteContainer>
+                        <VoteText 
+                           className={`upvote ${commentNode?.userVote === 'up' ? 'voted' : ''}`}
+                           onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              // Implementare la logica di upvote
+                           }}
+                        >
+                           <span className="vote-icon">▲</span>
+                           <span className="vote-count">{commentNode?.upvotes || 0}</span>
+                        </VoteText>
+
+                        <VoteText 
+                           className={`downvote ${commentNode?.userVote === 'down' ? 'voted' : ''}`}
+                           onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              // Implementare la logica di downvote
+                           }}
+                        >
+                           <span className="vote-icon">▼</span>
+                           <span className="vote-count">{commentNode?.downvotes || 0}</span>
+                        </VoteText>
+                     </VoteContainer>
                      
                      <ActionButton 
                         className="delete-btn"

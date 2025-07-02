@@ -136,7 +136,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               },
             },
           },
-          scope: "shogun-wall",
           peers: ["wss://ruling-mastodon-improved.ngrok-free.app/gun","wss://peer.Shogun-Wall/gun","wss://gun-manhattan.herokuapp.com/gun"],
           logging: {
             enabled: true,

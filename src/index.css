@@ -66,18 +66,18 @@
    --dark-accent: #8A3FFC;
    --dark-accent-hover: #9B5CFF;
 
-   /* Light theme variables */
-   --background: #ffffff;
-   --background-secondary: var(--gray-50);
-   --surface: #ffffff;
-   --surface-hover: var(--gray-50);
-   --border: var(--gray-200);
-   --border-hover: var(--gray-300);
-   --text-primary: var(--gray-900);
-   --text-secondary: var(--gray-600);
-   --text-muted: var(--gray-500);
-   --accent: var(--violet-600);
-   --accent-hover: var(--violet-700);
+   /* Light theme variables - Shogun Style */
+   --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+   --background-secondary: #f1f5f9;
+   --surface: rgba(255, 255, 255, 0.85);
+   --surface-hover: rgba(248, 250, 252, 0.9);
+   --border: rgba(0, 0, 0, 0.12);
+   --border-hover: rgba(59, 130, 246, 0.4);
+   --text-primary: #1e293b;
+   --text-secondary: #475569;
+   --text-muted: #64748b;
+   --accent: #3b82f6;
+   --accent-hover: #2563eb;
 
    /* Legacy variable mapping for backward compatibility */
    --background-color: var(--background);
@@ -128,17 +128,17 @@
 }
 
 [data-theme='dark'] {
-   --background: var(--dark-bg);
-   --background-secondary: var(--dark-bg-secondary);
-   --surface: var(--dark-surface);
-   --surface-hover: var(--dark-surface-hover);
-   --border: var(--dark-border);
-   --border-hover: var(--dark-border-hover);
-   --text-primary: var(--dark-text-primary);
-   --text-secondary: var(--dark-text-secondary);
-   --text-muted: var(--dark-text-muted);
-   --accent: var(--dark-accent);
-   --accent-hover: var(--dark-accent-hover);
+   --background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+   --background-secondary: #16213e;
+   --surface: rgba(40, 44, 52, 0.85);
+   --surface-hover: rgba(45, 50, 60, 0.9);
+   --border: rgba(255, 255, 255, 0.12);
+   --border-hover: rgba(59, 130, 246, 0.4);
+   --text-primary: #f8fafc;
+   --text-secondary: #cbd5e1;
+   --text-muted: #94a3b8;
+   --accent: #3b82f6;
+   --accent-hover: #2563eb;
 
    /* Legacy variable mapping for dark mode */
    --background-color: var(--background);
@@ -162,10 +162,7 @@
    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
 }
 
-[data-theme='dark'] body {
-    background: linear-gradient(180deg, #121316 0%, #1A1B20 100%);
-    background-attachment: fixed;
-}
+/* Removed - now using CSS variables */
 
 /* Reset and base styles */
 *, *::before, *::after {
@@ -357,7 +354,8 @@ body, html, #root {
    font-family: var(--font-sans);
    font-size: 14px;
    line-height: 1.5;
-   background-color: var(--background);
+   background: var(--background) !important;
+   background-attachment: fixed;
    color: var(--text-primary);
    width: 100%;
    min-height: 100vh;
@@ -367,7 +365,7 @@ body, html, #root {
    overflow-x: hidden;
 }
 
-/* Typography */
+/* Typography - Shogun Landing Style */
 h1, h2, h3, h4, h5, h6 {
    font-family: var(--font-sans);
    font-weight: 600;
@@ -376,16 +374,35 @@ h1, h2, h3, h4, h5, h6 {
    margin: 0 0 var(--space-4) 0;
 }
 
-h1 { font-size: 2.25rem; font-weight: 700; }
-h2 { font-size: 1.875rem; }
+h1 { 
+   font-size: 2.25rem; 
+   font-weight: 700; 
+   background: linear-gradient(135deg, var(--text-primary), var(--accent)) !important;
+   background-clip: text !important;
+   -webkit-background-clip: text !important;
+   -webkit-text-fill-color: transparent !important;
+}
+
+h2, h3 { 
+   font-size: 1.875rem;
+   color: var(--text-primary) !important;
+   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
 h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
+
+h4 { 
+   font-size: 1.25rem;
+   color: var(--text-primary) !important;
+   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
 h5 { font-size: 1.125rem; }
 h6 { font-size: 1rem; }
 
 p {
    margin: 0 0 var(--space-4) 0;
-   color: var(--text-secondary);
+   color: #cbd5e1;
    line-height: 1.6;
 }
 
@@ -400,7 +417,7 @@ a {
    }
 }
 
-/* Button styles */
+/* Button styles - Shogun Landing Style */
 .btn, button {
    display: inline-flex;
    align-items: center;
@@ -412,9 +429,9 @@ a {
    font-weight: 500;
    line-height: 1;
    border: 1px solid transparent;
-   border-radius: var(--radius-lg);
+   border-radius: 0.75rem;
    cursor: pointer;
-   transition: all 0.2s ease;
+   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
    text-decoration: none;
    white-space: nowrap;
    min-height: 40px;
@@ -431,13 +448,14 @@ a {
 }
 
 .btn-primary {
-   background: var(--accent);
+   background: linear-gradient(135deg, #3b82f6, #2563eb);
+   border: none;
    color: white;
    
    &:hover:not(:disabled) {
-      background: var(--accent-hover);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
    }
 }
 
@@ -455,13 +473,16 @@ a {
 }
 
 .btn-outline {
-   background: transparent;
-   color: var(--accent);
-   border-color: var(--accent);
+   background: rgba(255, 255, 255, 0.05);
+   border: 1px solid var(--border);
+   color: var(--text-primary);
    
    &:hover:not(:disabled) {
-      background: var(--accent);
-      color: white;
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--border-hover);
+      color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
    }
 }
 
@@ -499,7 +520,7 @@ a {
    min-height: 48px;
 }
 
-/* Input styles */
+/* Input styles - Shogun Landing Style */
 input, textarea, select {
    width: 100%;
    padding: var(--space-3) var(--space-4);
@@ -509,13 +530,14 @@ input, textarea, select {
    color: var(--text-primary);
    background: var(--surface);
    border: 1px solid var(--border);
-   border-radius: var(--radius-md);
-   transition: all 0.2s ease;
+   border-radius: 0.75rem;
+   backdrop-filter: blur(20px);
+   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
    
    &:focus {
       outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+      border-color: var(--border-hover);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
    }
    
    &::placeholder {
@@ -554,19 +576,24 @@ textarea {
    min-height: 80px;
 }
 
-/* Card styles */
+/* Card styles - Shogun Landing Style */
 .card, .post-card {
    background: var(--surface);
    border: 1px solid var(--border);
-   border-radius: var(--radius-xl);
+   border-radius: 1rem;
    padding: var(--space-6);
    margin: var(--space-4) 0;
-   box-shadow: var(--shadow-sm);
-   transition: all 0.2s ease;
+   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15),
+               0 2px 4px -1px rgba(0, 0, 0, 0.1);
+   backdrop-filter: blur(20px);
+   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
    
    &:hover {
-      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                  0 0 30px rgba(59, 130, 246, 0.15);
       border-color: var(--border-hover);
+      background: var(--surface-hover);
    }
 }
 
@@ -741,10 +768,11 @@ textarea {
    font-size: 0.875em;
 }
 
-/* Navigation */
+/* Navigation - Shogun Landing Style */
 .nav-header, .topbar {
-   background: var(--surface);
-   border-bottom: 1px solid var(--border);
+   background: rgba(0, 0, 0, 0.4);
+   backdrop-filter: blur(20px);
+   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
    padding: var(--space-4) var(--space-6);
    display: flex;
    align-items: center;
@@ -799,13 +827,17 @@ textarea {
 }
 
 .badge-success {
-   background: var(--success-500);
+   background: linear-gradient(135deg, #10b981, #059669);
    color: white;
+   border: none;
+   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .badge-neutral {
-   background: var(--gray-400);
+   background: linear-gradient(135deg, #6b7280, #4b5563);
    color: white;
+   border: none;
+   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .badge-xs {

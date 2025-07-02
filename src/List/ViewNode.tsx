@@ -22,22 +22,53 @@ type ViewNodeProps = {
 
 const ViewNodeStyled = styled.div`
    border: 1px solid var(--gray-200);
-   border-radius: 8px;
+   border-radius: 1rem;
    margin-bottom: 16px;
    padding: 16px;
-   background-color: var(--card-color);
+   background: var(--card-color);
+   backdrop-filter: blur(20px);
    cursor: pointer;
-   transition: all 0.2s ease;
+   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+               0 2px 4px -1px rgba(0, 0, 0, 0.03);
    
    &:hover {
-      border-color: var(--gray-300);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transform: translateY(-4px);
+      border-color: var(--primary-200);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1),
+                  0 0 30px rgba(59, 130, 246, 0.1);
+      background: var(--gray-50);
+   }
+
+   .mainWrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+   }
+
+   .comment-body {
+      color: var(--gray-700);
+   }
+
+   .nodeLink {
+      color: var(--primary-600);
+      text-decoration: none;
+      
+      &:hover {
+         text-decoration: underline;
+      }
+   }
+
+   [class*="link-indicator"] {
+      color: var(--gray-600);
    }
 `
 
 const Title = styled.h4`
    margin: 4px 0px;
    font-weight: 800;
+   color: var(--gray-900) !important;
 `
 
 const Username = styled.div`
@@ -51,7 +82,7 @@ const Username = styled.div`
    }
    
    .verified-badge {
-      color: var(--success-500);
+      color: var(--success-600);
       margin-left: 4px;
       font-size: 10px;
    }
@@ -111,6 +142,60 @@ const Menu = styled.div`
          }
       }
    }
+`
+
+const VoteText = styled.span`
+   display: inline-flex;
+   align-items: center;
+   gap: 4px;
+   cursor: pointer;
+   font-size: 13px;
+   font-weight: 500;
+   color: #94a3b8;
+   transition: all 0.2s ease;
+   user-select: none;
+
+   &.upvote {
+      &:hover {
+         color: #4CAF50;
+      }
+      
+      &.voted {
+         color: #4CAF50;
+         font-weight: 600;
+      }
+   }
+
+   &.downvote {
+      &:hover {
+         color: #f44336;
+      }
+      
+      &.voted {
+         color: #f44336;
+         font-weight: 600;
+      }
+   }
+
+   .vote-icon {
+      font-size: 11px;
+   }
+
+   .vote-count {
+      min-width: 16px;
+      text-align: center;
+   }
+`
+
+const VoteContainer = styled.div`
+   display: flex;
+   align-items: center;
+   gap: 12px;
+   padding: 4px 8px;
+   border-radius: 6px;
+   background: rgba(255, 255, 255, 0.05);
+   margin-left: 7px;
+   margin-top: 5px;
 `
 
 export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
@@ -252,18 +337,8 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
 
    return (
       <ViewNodeStyled className="viewNodeStyled" onClick={onPostClicked}>
-         <div
-            className="mainWrapper"
-            style={{
-               display: 'flex',
-               flexDirection: 'column',
-               alignItems: 'flex-start',
-               width: '100%',
-            }}
-         >
-            <Title onClick={onPostClicked}>
-               {node.directionText}
-            </Title>
+         <div className="mainWrapper">
+            <Title>{node.directionText}</Title>
             
             {/* Hashtags */}
             {node.hashtags && (
@@ -278,8 +353,9 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
                         key={index}
                         style={{
                            padding: '1px 6px',
-                           backgroundColor: '#f0f0f0',
-                           color: '#666',
+                           background: 'var(--primary-50)',
+                           border: '1px solid var(--primary-100)',
+                           color: 'var(--primary-700)',
                            borderRadius: '8px',
                            fontSize: '10px',
                            fontWeight: '500'
@@ -292,19 +368,19 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
             )}
 
             {/* Message preview */}
-         {node.message && (
+            {node.message && (
                <div 
                   style={{ 
                      fontSize: '14px', 
-                     color: '#666', 
+                     color: 'var(--gray-700)', 
                      marginBottom: '8px',
-                     lineHeight: '1.4'
+                     lineHeight: '1.6'
                   }}
-               dangerouslySetInnerHTML={{
+                  dangerouslySetInnerHTML={{
                      __html: createMessagePreview(node.message, 150)
-               }}
+                  }}
                />
-         )}
+            )}
          </div>
 
          <Menu>
@@ -315,7 +391,11 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
                      e.stopPropagation()
                      navigate(`/profile/${encodeURIComponent(node.user)}`)
                   }}
-                  style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                  style={{ 
+                     cursor: 'pointer', 
+                     textDecoration: 'underline',
+                     color: 'var(--gray-700)'
+                  }}
                   title={`Vedi tutti i contenuti di ${formatAuthorDisplay(node.user)}`}
                >
                   @{formatAuthorDisplay(node.user)}
@@ -330,7 +410,7 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
             {node.platform && (
                <div style={{
                   fontSize: '11px',
-                  color: '#666',
+                  color: 'var(--gray-600)',
                   fontStyle: 'italic',
                   paddingLeft: '7px',
                   paddingTop: '5px'
@@ -347,48 +427,46 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
             )}
 
             <div className="nodeLink">
-               <Link to={'/node/' + node.key}>node-link</Link>
+               <Link to={'/node/' + node.key} style={{ color: 'var(--primary-600)' }}>node-link</Link>
             </div>
             
             {/* Sistema di voting */}
-            <div style={{ 
-               display: 'flex', 
-               alignItems: 'center', 
-               gap: '4px',
-               paddingLeft: '7px',
-               paddingTop: '5px'
-            }}>
-               <SimpleIcon
-                  content="⇧"
-                  hoverContent={'Upvote'}
-                  style={Styles.positive}
-                  className="simpleIcon"
+            <VoteContainer onClick={e => e.stopPropagation()}>
+               <VoteText 
+                  className="upvote"
                   onClick={(e) => {
                      e.stopPropagation()
                      upVote(node)
                   }}
-               />
+                  title="Upvote questo contenuto"
+                  style={{ color: 'var(--gray-600)' }}
+               >
+                  <span className="vote-icon">▲</span>
+                  <span className="vote-count">{node?.upVotes || 0}</span>
+               </VoteText>
+
                <span style={{ 
-                  fontSize: '12px', 
+                  fontSize: '14px', 
                   fontWeight: 'bold',
-                  color: (node?.upVotes || 0) > (node?.downVotes || 0) ? '#28a745' : 
-                         (node?.downVotes || 0) > (node?.upVotes || 0) ? '#dc3545' : '#666',
-                  minWidth: '20px',
-                  textAlign: 'center'
+                  color: (node?.upVotes || 0) > (node?.downVotes || 0) ? 'var(--success-600)' : 
+                         (node?.downVotes || 0) > (node?.upVotes || 0) ? 'var(--error-600)' : 'var(--gray-500)'
                }}>
                   {(node?.upVotes || 0) - (node?.downVotes || 0)}
                </span>
-               <SimpleIcon
-                  content="⇩"
-                  hoverContent={'Downvote'}
-                  style={Styles.warning}
-                  className="simpleIcon"
+
+               <VoteText 
+                  className="downvote"
                   onClick={(e) => {
                      e.stopPropagation()
                      downVote(node)
                   }}
-               />
-            </div>
+                  title="Downvote questo contenuto"
+                  style={{ color: 'var(--gray-600)' }}
+               >
+                  <span className="vote-icon">▼</span>
+                  <span className="vote-count">{node?.downVotes || 0}</span>
+               </VoteText>
+            </VoteContainer>
             
             {/* Pulsante Modifica */}
             {canEditNode(node) && (
@@ -397,30 +475,32 @@ export const ViewNode: FC<ViewNodeProps> = ({ node, onNodeRemoved }) => {
                      onClick={handleEditNode}
                      style={{
                         padding: '4px 8px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: '0.75rem',
                         fontSize: '11px',
                         fontWeight: '600',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '3px',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 2px 4px rgba(102, 126, 234, 0.3)',
+                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.15)',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'
                      }}
                      onMouseOver={(e) => {
                         const target = e.target as HTMLButtonElement;
-                        target.style.transform = 'translateY(-1px)';
-                        target.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.4)';
+                        target.style.transform = 'translateY(-2px)';
+                        target.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+                        target.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.2)';
                      }}
                      onMouseOut={(e) => {
                         const target = e.target as HTMLButtonElement;
                         target.style.transform = 'translateY(0)';
-                        target.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.3)';
+                        target.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+                        target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.15)';
                      }}
                      title="Modifica questo contenuto"
                   >
